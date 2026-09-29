@@ -145,7 +145,7 @@ summary::-webkit-details-marker{display:none}
 .btn-idea{background:var(--idea);color:var(--bg)}
 .btn-plain{background:var(--surface2);color:var(--fg)}
 .linkish{border:0;background:none;color:var(--muted);font-size:13px;text-decoration:underline;padding:6px 0}
-.tabs{position:fixed;left:0;right:0;bottom:0;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));background:var(--bg);border-top:1px solid var(--line);z-index:5}
+.tabs{position:fixed;left:0;right:0;bottom:0;transform:translateZ(0);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));background:var(--bg);border-top:1px solid var(--line);z-index:5}
 .tabs div{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px}
 .tabs button{height:52px;border:0;border-radius:14px;background:transparent;color:var(--muted);font-size:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
 .tabs button svg{stroke:currentColor}
@@ -363,6 +363,7 @@ code{font-size:12px;background:var(--surface2);padding:2px 6px;border-radius:6px
       <div class="field"><label for="cfgTok">Ключ</label><input id="cfgTok" autocomplete="off"></div>
       <button type="button" class="btn btn-money" id="cfgSave">Подключить и синхронизировать</button>
       <div class="small muted" id="cfgInfo"></div>
+      <div class="small muted">Версия приложения: v11</div>
     </div>
     <div class="card">
       <h2>Резервная копия</h2>
@@ -716,10 +717,10 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTi
 /* ---------- navigation ---------- */
 const TITLES={today:"Сегодня",progress:"Прогресс",bjj:"BJJ",lists:"Разделы",settings:"Настройки"};
 let bjjView="В работе", tab="today", curDay=today(), monthSel=null, openList=null, listFilter="Все", listSearch="";
-function setTab(t){ tab=t; $("#evRow").hidden=t!=="today"||!upcoming().length; for(const k in TITLES) $("#v-"+k).hidden=k!==t;
+function setTab(t){ window.scrollTo(0,0); tab=t; $("#evRow").hidden=t!=="today"||!upcoming().length; for(const k in TITLES) $("#v-"+k).hidden=k!==t;
   $$(".tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.go===t?"page":"false"));
   $("#viewTitle").textContent=t==="lists"&&openList&&col("lists")[openList]?col("lists")[openList].name:TITLES[t];
-  try{sessionStorage.setItem("tab",t);}catch(e){} window.scrollTo(0,0); }
+  try{sessionStorage.setItem("tab",t);}catch(e){} window.scrollTo(0,0); requestAnimationFrame(()=>window.scrollTo(0,0)); }
 document.addEventListener("click",e=>{const b=e.target.closest("[data-go]"); if(b){ if(b.dataset.go==="lists"&&tab==="lists"){openList=null;renderLists();} setTab(b.dataset.go);} });
 
 /* ---------- calculations ---------- */
