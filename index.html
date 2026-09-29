@@ -1,0 +1,1193 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ilim OS</title>
+<meta name="theme-color" content="#121211">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ilim OS">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Onest:wght@400;500;600;700&display=swap">
+<style>
+/* Phone-first one-column app (max 520px), fixed bottom tab bar, bottom sheets for input. Dark-first. */
+:root{
+  --bg:#121211;--surface:#1C1B19;--surface2:#26241F;--surface3:#33302A;--line:#2F2D28;
+  --fg:#F3F0E8;--muted:#A8A398;
+  --body:#F08A66;--body-bg:#2A1A14;--money:#5DBB8A;--money-bg:#16271F;
+  --journal:#B8A2F0;--journal-bg:#221D2E;--idea:#E0B04A;--idea-bg:#2A2415;
+  --blue:#6FA8DC;--blue-bg:#16222E;--sand:#C9A26B;--sand-bg:#2A2319;
+  --on-money:#0E1F16;--danger:#E5675A;--grey:#7A766C;
+  --display:"Unbounded",system-ui,sans-serif;--text:"Onest",system-ui,sans-serif;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){:root{
+  --bg:#F6F4EF;--surface:#FFFFFF;--surface2:#EFECE4;--surface3:#E4E0D5;--line:#E2DED3;
+  --fg:#1B1A17;--muted:#645F55;
+  --body:#B8481F;--body-bg:#FBE9E1;--money:#237A4E;--money-bg:#E3F3EA;
+  --journal:#6147C4;--journal-bg:#EDE8FB;--idea:#8A5F00;--idea-bg:#FBF1D9;
+  --blue:#2F6FB0;--blue-bg:#E4EEF8;--sand:#8C6428;--sand-bg:#F5ECDD;
+  --on-money:#FFFFFF;--danger:#B83227;--grey:#8A857A;
+  color-scheme:light;}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg)}
+body{font-family:var(--text);font-size:15px;line-height:1.45;padding-inline:16px;padding-block:0;-webkit-tap-highlight-color:transparent}
+.app{max-width:520px;margin:0 auto;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(100px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
+h1,h2,h3{margin:0;text-wrap:balance}
+h1{font-family:var(--display);font-weight:700;font-size:26px}
+h2{font-size:16px;font-weight:600}
+.eyebrow{font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.muted{color:var(--muted)} .small{font-size:13px}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--journal);outline-offset:2px}
+[hidden]{display:none!important}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.sync{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.sync i{width:8px;height:8px;border-radius:4px;background:var(--grey);display:inline-block}
+.sync[data-s="ok"] i{background:var(--money)} .sync[data-s="busy"] i{background:var(--idea)} .sync[data-s="err"] i{background:var(--danger)}
+.evrow{display:grid;gap:8px}
+.evt{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:16px;background:var(--surface);border:0;text-align:left;min-width:0;color:var(--fg)}
+.evt b{font-family:var(--display);font-size:22px;line-height:1.15;font-variant-numeric:tabular-nums}
+.evt span{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.evt.first{background:var(--body-bg)} .evt.first b{color:var(--body)}
+.ev{display:flex;flex-direction:column;align-items:flex-end;padding:8px 12px;border-radius:14px;background:var(--body-bg);color:var(--body);border:0;text-align:right}
+.ev b{font-family:var(--display);font-size:20px;line-height:1.1}
+.ev span{font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.view{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--surface);border-radius:22px;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.daynav{display:flex;align-items:center;gap:6px}
+.daynav button{width:36px;height:36px;border:0;border-radius:10px;background:var(--surface2)}
+.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.metric{background:var(--surface2);border-radius:16px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
+.metric .val{font-family:var(--display);font-weight:700;font-size:24px;font-variant-numeric:tabular-nums;min-height:32px}
+.step{display:flex;gap:6px}
+.step button{width:48px;height:38px;border:0;border-radius:10px;background:var(--surface3);font-size:19px}
+.dots{display:flex;gap:3px;width:100%}
+.dots button{flex:1;min-width:0;height:38px;border:0;border-radius:9px;background:var(--surface3);font-size:13px;font-weight:600;color:var(--muted);padding:0}
+.dots button[aria-pressed="true"]{background:var(--idea);color:var(--bg)}
+.quick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.qbtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px 4px;border:0;border-radius:18px;text-align:center;min-height:78px;color:var(--fg);min-width:0}
+.qbtn b{font-size:13px;font-weight:600} .qbtn span{display:none}
+.q-money{background:var(--money-bg)} .q-money svg{stroke:var(--money)}
+.q-body{background:var(--body-bg)} .q-body svg{stroke:var(--body)}
+.q-journal{background:var(--journal-bg)} .q-journal svg{stroke:var(--journal)}
+.q-idea{background:var(--idea-bg)} .q-idea svg{stroke:var(--idea)}
+.stats4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.stats4 div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.stats4 span{font-size:12px;color:var(--muted)} .stats4 b{font-size:15px;font-variant-numeric:tabular-nums}
+.focus-list{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.chart{display:flex;align-items:flex-end;gap:8px;height:120px}
+.bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;height:100%;justify-content:flex-end}
+.bar i{display:block;width:100%;border-radius:7px;background:var(--surface3);min-height:4px}
+.bar.now i{background:var(--c,var(--body))}
+.bar small{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar.now small{color:var(--fg);font-weight:600}
+.axis{display:flex;gap:8px}.axis span{flex:1;text-align:center;font-size:10px;color:var(--muted)}
+#ch-weight,#ax-weight{justify-content:center}#ch-weight .bar,#ax-weight span{max-width:40px}
+.insight{background:var(--idea-bg);border-radius:16px;padding:12px 14px;font-size:14px;display:flex;gap:10px}
+.insight svg{flex:none;stroke:var(--idea)}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;padding:4px;border-radius:14px;background:var(--surface2);overflow-x:auto}
+.seg button{height:42px;border:0;border-radius:11px;background:transparent;color:var(--muted);font-size:14px;padding:0 8px;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg);font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{height:40px;padding:0 14px;border:1px solid var(--line);border-radius:20px;background:transparent;font-size:14px}
+.chip[aria-pressed="true"]{background:var(--money);border-color:var(--money);color:var(--on-money);font-weight:600}
+.stack{display:flex;height:12px;border-radius:6px;overflow:hidden;gap:2px;background:var(--surface2)}
+.legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px;font-size:13px}
+.legend div{display:flex;align-items:center;gap:6px;min-width:0}
+.legend i{width:10px;height:10px;border-radius:3px;flex:none}
+.legend span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.legend b{margin-left:auto;font-weight:600;font-variant-numeric:tabular-nums}
+.money3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.money3 div{display:flex;flex-direction:column;gap:2px}
+.money3 span{font-size:12px;color:var(--muted)}
+.money3 b{font-family:var(--display);font-size:17px;font-variant-numeric:tabular-nums}
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line);min-width:0;background:none;border-left:0;border-right:0;border-bottom:0;text-align:left;width:100%}
+.li:first-child{border-top:0}
+.li .grow{flex:1;min-width:0}
+.li .t{overflow-wrap:anywhere}
+.x{border:0;background:var(--surface2);border-radius:10px;height:36px;padding:0 12px;font-size:13px;color:var(--muted);flex:none}
+.x[data-armed="1"]{background:var(--danger);color:#fff}
+.icon-btn{border:0;background:var(--surface2);border-radius:12px;height:40px;padding:0 14px;font-size:14px;flex:none}
+.pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;background:var(--surface3);color:var(--muted);vertical-align:middle}
+.tech{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:16px;background:var(--surface2);border:0;text-align:left;width:100%}
+.tech small{color:var(--muted)}
+details{border-top:1px solid var(--line);padding:10px 0}
+details:first-child{border-top:0}
+summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:10px}
+summary::-webkit-details-marker{display:none}
+.dl{display:grid;gap:6px;margin-top:8px;font-size:14px}
+.dl p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.dl span{color:var(--muted);font-size:12px}
+.lists{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.lcard{display:flex;flex-direction:column;gap:6px;padding:16px;border:0;border-radius:20px;text-align:left;min-height:96px;color:var(--fg);background:var(--surface)}
+.lcard b{font-size:16px}
+.lcard i{width:10px;height:10px;border-radius:3px;display:block}
+.lcard span{font-size:12px;color:var(--muted)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:12px;color:var(--muted)}
+.field input,.field textarea,.field select{width:100%;border:1px solid var(--line);background:var(--surface2);border-radius:12px;padding:10px 12px;font-size:16px}
+.field textarea{min-height:64px;resize:vertical}
+.amount{width:100%;border:0;background:transparent;text-align:center;font-family:var(--display);font-weight:700;font-size:44px;font-variant-numeric:tabular-nums;padding:0}
+.btn{height:54px;border:0;border-radius:18px;font-size:16px;font-weight:700;width:100%}
+.btn-money{background:var(--money);color:var(--on-money)}
+.btn-body{background:var(--body);color:var(--bg)}
+.btn-journal{background:var(--journal);color:var(--bg)}
+.btn-idea{background:var(--idea);color:var(--bg)}
+.btn-plain{background:var(--surface2);color:var(--fg)}
+.linkish{border:0;background:none;color:var(--muted);font-size:13px;text-decoration:underline;padding:6px 0}
+.tabs{position:fixed;left:0;right:0;bottom:0;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));background:var(--bg);border-top:1px solid var(--line);z-index:5}
+.tabs div{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px}
+.tabs button{height:52px;border:0;border-radius:14px;background:transparent;color:var(--muted);font-size:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.tabs button svg{stroke:currentColor}
+.tabs button[aria-current="page"]{color:var(--fg);background:var(--surface);font-weight:600}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:11;max-height:92%;overflow:auto;background:var(--surface);border-radius:26px 26px 0 0;padding:12px 16px calc(20px + env(safe-area-inset-bottom,0px));overscroll-behavior:contain}
+.sheet-in{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.grip{width:40px;height:5px;border-radius:3px;background:var(--surface3);align-self:center}
+.rate-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.rate-row button{height:40px;border:0;border-radius:10px;background:var(--surface2);font-weight:600;color:var(--muted)}
+.rate-row button[aria-pressed="true"]{background:var(--journal);color:var(--bg)}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:14px;font-size:14px;z-index:20;max-width:calc(100% - 32px)}
+.empty{padding:14px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);font-size:14px}
+.stars{display:flex;gap:4px}
+.stars button{width:40px;height:40px;border:0;border-radius:10px;background:var(--surface2);color:var(--muted);font-size:18px}
+.stars button[aria-pressed="true"]{background:var(--idea);color:var(--bg)}
+.toggle{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:14px;background:var(--surface2)}
+.toggle input{width:22px;height:22px;accent-color:var(--idea)}
+code{font-size:12px;background:var(--surface2);padding:2px 6px;border-radius:6px;overflow-wrap:anywhere}
+.prog{height:8px;border-radius:4px;background:var(--surface3);overflow:hidden}
+.prog i{display:block;height:100%;border-radius:4px;background:var(--c,var(--money))}
+.grp{font-size:12px;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;padding-top:6px}
+.bookcard{display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:16px;background:var(--surface2);border:0;text-align:left;width:100%}
+.bookrow{display:flex;gap:8px;align-items:center}
+.bookrow .prog{flex:1}
+.late{color:var(--danger);font-weight:600}
+.attn{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:var(--surface2);border:0;text-align:left;width:100%}
+.attn b{font-size:14px;font-weight:600} .attn span{font-size:12px;color:var(--muted)}
+.attn i{width:8px;height:8px;border-radius:4px;flex:none;background:var(--c,var(--idea))}
+.quickadd{display:flex;gap:8px}
+.quickadd input{flex:1;min-width:0;border:1px solid var(--line);background:var(--surface2);border-radius:12px;padding:10px 12px;font-size:16px}
+.quickadd button{border:0;border-radius:12px;background:var(--idea);color:var(--bg);font-weight:700;padding:0 16px}
+.range{display:flex;align-items:center;gap:10px}.range input{flex:1;accent-color:var(--money)}
+.summary{display:flex;flex-wrap:wrap;gap:6px}
+.summary button{border:0;border-radius:12px;background:var(--surface2);padding:6px 10px;font-size:13px;color:var(--muted)}
+.summary button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.summary b{color:inherit;font-weight:700;margin-left:4px}
+.catchip{display:inline-flex;align-items:center;gap:2px;height:38px;padding:0 4px 0 12px;border:1px solid var(--line);border-radius:19px;font-size:14px}
+.catchip button{border:0;background:transparent;color:var(--muted);width:30px;height:30px;border-radius:15px;font-size:16px}
+.catchip[data-armed="1"]{background:var(--danger);border-color:var(--danger);color:#fff}
+.catchip[data-armed="1"] button{color:#fff}
+.bill{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.bill:first-child{border-top:0}
+.bill .grow{flex:1;min-width:0}
+.paid{color:var(--money);font-weight:600;font-size:13px}
+.paybtn{border:0;border-radius:12px;background:var(--money);color:var(--on-money);font-weight:700;height:38px;padding:0 14px;flex:none}
+@media (prefers-reduced-motion: no-preference){.sheet{animation:up .22s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div>
+      <div class="eyebrow" id="dateLabel"></div>
+      <h1 id="viewTitle">Сегодня</h1>
+      <div class="sync" id="sync" data-s="local"><i></i><span id="syncText">только на этом устройстве</span></div>
+    </div>
+  </header>
+  <div class="evrow" id="evRow" hidden></div>
+
+  <!-- TODAY -->
+  <section id="v-today" class="view">
+    <div class="quick">
+      <button type="button" class="qbtn q-money" data-open="expense"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><b>Расход</b><span>10 секунд</span></button>
+      <button type="button" class="qbtn q-body" data-open="train"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="7" r="3"/><path d="M5 21c1-5 4-7 7-7s6 2 7 7"/></svg><b>Тренировка</b><span>4 строки</span></button>
+      <button type="button" class="qbtn q-journal" data-open="journal"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg><b>Дневник</b><span id="journalState">4 вопроса</span></button>
+      <button type="button" class="qbtn q-idea" data-open="thought"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5V16h8v-2.5A6 6 0 0 0 12 3z"/></svg><b>Мысль</b><span>одна строка</span></button>
+    </div>
+    <div class="card">
+      <div class="row">
+        <h2 id="ciTitle">Чек-ин</h2>
+        <div class="daynav"><button type="button" id="dPrev" aria-label="Предыдущий день">‹</button><button type="button" id="dNext" aria-label="Следующий день">›</button></div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><span class="small muted">Сон, ч</span><div class="val" id="m-sleep">—</div>
+          <div class="step"><button type="button" aria-label="Меньше сна" data-step="sleep" data-d="-0.5">−</button><button type="button" aria-label="Больше сна" data-step="sleep" data-d="0.5">+</button></div></div>
+        <div class="metric"><span class="small muted">Сигареты</span><div class="val" id="m-cigs" style="color:var(--body)">—</div>
+          <div class="step"><button type="button" aria-label="Меньше сигарет" data-step="cigs" data-d="-1">−</button><button type="button" aria-label="Больше сигарет" data-step="cigs" data-d="1">+</button></div></div>
+        <div class="metric"><span class="small muted">Энергия</span><div class="dots" data-dots="energy"></div></div>
+        <div class="metric"><span class="small muted">Настроение</span><div class="dots" data-dots="mood"></div></div>
+        <div class="toggle" id="m-cardio-wrap" style="grid-column:1/-1" hidden><label for="m-cardio">Кардио сегодня (бег, круги, скакалка)</label><input id="m-cardio" type="checkbox"></div>
+        <div class="metric" id="m-weight-wrap" style="grid-column:1/-1" hidden><span class="small muted" id="m-weight-l">Вес, кг · кэмп</span><div class="val" id="m-weight">—</div>
+          <div class="step"><button type="button" aria-label="Меньше веса" data-step="weight" data-d="-0.1">−</button><button type="button" aria-label="Больше веса" data-step="weight" data-d="0.1">+</button></div></div>
+      </div>
+      <div class="small muted">Сигареты: утром полная пачка, вечером 20 минус остаток.</div>
+    </div>
+    <div class="card" id="attnCard" hidden>
+      <h2>Требует внимания</h2>
+      <div class="view" style="gap:8px" id="attnList"></div>
+    </div>
+    <div class="card" id="soonCard" hidden>
+      <div class="row"><h2>Скоро</h2><button type="button" class="linkish" data-go="settings">изменить</button></div>
+      <div class="list" id="soonList"></div>
+    </div>
+    <div class="card">
+      <div class="row"><h2>Эта неделя</h2><button type="button" class="linkish" data-go="progress">Прогресс →</button></div>
+      <div class="stats4">
+        <div><span>BJJ</span><b id="w-bjj">0</b></div>
+        <div><span>Сон ср.</span><b id="w-sleep">—</b></div>
+        <div><span>Сигареты ср.</span><b id="w-cigs" style="color:var(--body)">—</b></div>
+        <div><span>Остаток мес.</span><b id="w-left" style="color:var(--money)">—</b></div>
+      </div>
+    </div>
+    <div class="card" id="focusCard">
+      <div class="row"><h2>Фокусы</h2><button type="button" class="linkish" id="focusEdit">изменить</button></div>
+      <div class="view" style="gap:10px" id="focusGoals"></div>
+      <ol class="focus-list" id="focusList"></ol>
+    </div>
+  </section>
+
+  <!-- PROGRESS -->
+  <section id="v-progress" class="view" hidden>
+    <div class="card">
+      <div class="row"><h2>Обзор недели</h2><span class="small muted" id="revState"></span></div>
+      <button type="button" class="btn btn-journal" data-open="review">Открыть обзор недели</button>
+      <div class="row"><h2>Обзор месяца</h2><span class="small muted" id="monState"></span></div>
+      <button type="button" class="btn btn-plain" data-open="month">Открыть обзор месяца</button>
+    </div>
+    <div class="card" id="weightCard" hidden><div class="row"><h2>Вес, кг</h2><span class="small muted" id="weightGoal"></span></div>
+      <div class="chart" id="ch-weight" style="--c:var(--idea)"></div><div class="axis" id="ax-weight"></div></div>
+    <div class="card"><div class="row"><h2>Сигареты в день</h2><span class="small muted">по неделям</span></div>
+      <div class="chart" id="ch-cigs" style="--c:var(--body)"></div><div class="axis" id="ax-cigs"></div></div>
+    <div class="card"><div class="row"><h2>Сон, часов</h2><span class="small muted">среднее за неделю</span></div>
+      <div class="chart" id="ch-sleep" style="--c:var(--blue)"></div><div class="axis" id="ax-sleep"></div></div>
+    <div class="card"><div class="row"><h2>Тренировок BJJ</h2><span class="small muted">за неделю</span></div>
+      <div class="chart" id="ch-bjj" style="--c:var(--money)"></div><div class="axis" id="ax-bjj"></div></div>
+    <div id="insights" class="view" style="gap:8px"></div>
+    <div class="card">
+      <div class="row">
+        <button type="button" class="icon-btn" id="mPrev" aria-label="Предыдущий месяц">←</button>
+        <h2 id="mTitle" style="text-align:center">Деньги</h2>
+        <button type="button" class="icon-btn" id="mNext" aria-label="Следующий месяц">→</button>
+      </div>
+      <div class="money3">
+        <div><span>Доход</span><b id="mi-in">$0</b></div>
+        <div><span>Расход</span><b id="mi-out">$0</b></div>
+        <div><span>Остаток</span><b id="mi-left" style="color:var(--money)">$0</b></div>
+      </div>
+      <div class="stack" id="mStack"></div>
+      <div class="legend" id="mLegend"></div>
+      <div class="small muted" id="mIncome"></div>
+      <div class="small muted" id="mExtra"></div>
+    </div>
+    <div class="card"><div class="row"><h2>Платежи месяца</h2><button type="button" class="linkish" data-go="settings">настроить</button></div><div id="billList"></div></div>
+    <div class="card"><h2>Записи месяца</h2><div class="list" id="mList"></div></div>
+  </section>
+
+  <!-- BJJ -->
+  <section id="v-bjj" class="view" hidden>
+    <div class="card" id="campCard" hidden></div>
+    <button type="button" class="btn btn-body" data-open="train">+ Заметка после тренировки</button>
+    <div class="card"><div class="row"><h2>Техники</h2><button type="button" class="icon-btn" data-open="tech">+ Своя</button></div>
+      <div class="seg" id="bjjSeg"></div>
+      <div id="techs" class="view"></div></div>
+    <div class="card"><h2>Журнал тренировок</h2><div id="trainLog"></div></div>
+  </section>
+
+  <!-- LISTS -->
+  <section id="v-lists" class="view" hidden>
+    <div id="listsHome" class="view">
+      <div class="lists" id="listCards"></div>
+      <button type="button" class="btn btn-plain" data-open="listcfg">+ Новый раздел</button>
+    </div>
+    <div id="listOne" class="view" hidden>
+      <div class="row"><button type="button" class="icon-btn" id="listBack">← Разделы</button><button type="button" class="icon-btn" id="listEdit">Настроить</button></div>
+      <div id="listTop" class="view" style="gap:10px"></div>
+      <button type="button" class="btn btn-plain" id="listAdd">+ Добавить</button>
+      <div id="listBody" class="view"></div>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section id="v-settings" class="view" hidden>
+    <div class="card">
+      <h2>События и даты</h2>
+      <p class="small muted" style="margin:0">Ближайшее событие показывается вверху с обратным отсчётом.</p>
+      <div class="list" id="evList"></div>
+      <button type="button" class="btn btn-plain" data-open="event">+ Событие</button>
+    </div>
+    <div class="card">
+      <h2>Фокусы месяца</h2>
+      <div class="field"><label for="f1">1</label><input id="f1" data-focus="0"></div>
+      <div class="field"><label for="f2">2</label><input id="f2" data-focus="1"></div>
+      <div class="field"><label for="f3">3</label><input id="f3" data-focus="2"></div>
+    </div>
+    <div class="card">
+      <h2>Деньги</h2>
+      <p class="small muted" style="margin:0">Курс сохраняется в каждой записи в момент ввода — старые записи не пересчитываются.</p>
+      <div class="metrics">
+        <div class="field"><label for="rTRY">₺ за $1</label><input id="rTRY" inputmode="decimal"></div>
+        <div class="field"><label for="rKGS">сом за $1</label><input id="rKGS" inputmode="decimal"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Регулярные платежи</h2>
+      <p class="small muted" style="margin:0">Квартира, зал, связь, подписки. Без автооплаты: в «Прогрессе» жмёшь «Оплатить», и расход добавляется с готовой суммой. Напоминание ставь в TickTick.</p>
+      <div id="billSet"></div>
+      <button type="button" class="btn btn-plain" data-open="bill">+ Платёж</button>
+    </div>
+    <div class="card">
+      <h2>Категории расходов</h2>
+      <p class="small muted" style="margin:0">× — удалить (нажми дважды). Старые записи сохранят свою категорию.</p>
+      <div class="chips" id="catExp"></div>
+      <form class="quickadd" data-catadd="cats"><label for="addCatExp" hidden>Новая категория расходов</label><input id="addCatExp" placeholder="Новая категория" autocomplete="off"><button type="submit">+</button></form>
+    </div>
+    <div class="card">
+      <h2>Категории доходов</h2>
+      <div class="chips" id="catInc"></div>
+      <form class="quickadd" data-catadd="incCats"><label for="addCatInc" hidden>Новая категория доходов</label><input id="addCatInc" placeholder="Новая категория" autocomplete="off"><button type="submit">+</button></form>
+    </div>
+    <div class="card">
+      <h2>Синхронизация</h2>
+      <p class="small muted" style="margin:0">Адрес и ключ из твоей Google Таблицы (инструкция в файле README). Без них данные хранятся только на этом устройстве.</p>
+      <div class="field"><label for="cfgUrl">Адрес Apps Script (…/exec)</label><input id="cfgUrl" autocomplete="off" inputmode="url"></div>
+      <div class="field"><label for="cfgTok">Ключ</label><input id="cfgTok" autocomplete="off"></div>
+      <button type="button" class="btn btn-money" id="cfgSave">Подключить и синхронизировать</button>
+      <div class="small muted" id="cfgInfo"></div>
+    </div>
+    <div class="card">
+      <h2>Резервная копия</h2>
+      <div class="chips">
+        <button type="button" class="chip" id="bkSave">Скачать копию (JSON)</button>
+        <label class="chip" for="bkLoad" style="display:inline-flex;align-items:center">Восстановить из копии</label>
+        <input type="file" id="bkLoad" accept=".json,application/json" hidden>
+      </div>
+      <h2>Выгрузить в Excel (CSV)</h2>
+      <div class="chips">
+        <button type="button" class="chip" data-export="days">Дни</button>
+        <button type="button" class="chip" data-export="money">Деньги</button>
+        <button type="button" class="chip" data-export="trainings">Тренировки</button>
+        <button type="button" class="chip" data-export="items">Разделы</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<nav class="tabs" aria-label="Разделы"><div>
+  <button type="button" data-go="today" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>Сегодня</button>
+  <button type="button" data-go="progress"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Прогресс</button>
+  <button type="button" data-go="bjj"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="7" r="3"/><path d="M5 21c1-5 4-7 7-7s6 2 7 7"/></svg>BJJ</button>
+  <button type="button" data-go="lists"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>Разделы</button>
+  <button type="button" data-go="settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6a7 7 0 0 0 0 2.4l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.07-.4.1-.8.1-1.2z"/></svg>Настройки</button>
+</div></nav>
+
+<div class="scrim" id="scrim" hidden></div>
+
+<div class="sheet" id="s-expense" role="dialog" aria-modal="true" aria-labelledby="se-t" hidden><form class="sheet-in" id="f-expense">
+  <div class="grip"></div>
+  <div class="row"><h2 id="se-t">Новая запись</h2><button type="button" class="linkish" data-close>Отмена</button></div>
+  <div class="seg" id="e-type"></div>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+    <label for="e-amt" class="small muted">Сумма</label>
+    <input id="e-amt" class="amount" inputmode="decimal" placeholder="0" autocomplete="off">
+    <div class="small muted" id="e-usd">≈ $0</div>
+  </div>
+  <div class="seg" id="e-cur"></div>
+  <div class="field" id="e-cat-wrap"><label id="e-cat-l">Категория</label><div class="chips" id="e-cat"></div>
+    <div class="quickadd" id="e-newcat-row" hidden><label for="e-newcat" hidden>Новая категория</label><input id="e-newcat" placeholder="Название категории" autocomplete="off"><button type="button" id="e-newcat-add">Добавить</button></div></div>
+  <div class="field"><label for="e-what">Что (необязательно)</label><input id="e-what" autocomplete="off"></div>
+  <div class="toggle" id="e-opt-wrap"><label for="e-opt">Можно было без</label><input id="e-opt" type="checkbox"></div>
+  <div class="metrics">
+    <div class="field"><label for="e-date">Дата</label><input id="e-date" type="date"></div>
+    <div class="field" id="e-rate-wrap"><label for="e-rate" id="e-rate-l">Курс за $1</label><input id="e-rate" inputmode="decimal"></div>
+  </div>
+  <button type="submit" class="btn btn-money">Сохранить</button>
+  <button type="button" class="x" id="e-del" hidden style="height:44px">Удалить запись</button>
+</form></div>
+
+<div class="sheet" id="s-train" role="dialog" aria-modal="true" aria-labelledby="st-t" hidden><form class="sheet-in" id="f-train">
+  <div class="grip"></div>
+  <div class="row"><h2 id="st-t">После тренировки</h2><button type="button" class="linkish" data-close>Отмена</button></div>
+  <div class="seg" id="t-type"></div>
+  <div class="field"><label for="t-topic">Что тренировали</label><input id="t-topic" autocomplete="off"></div>
+  <div class="field"><label for="t-good">Получилось</label><textarea id="t-good" rows="2"></textarea></div>
+  <div class="field"><label for="t-bad">Не получилось</label><textarea id="t-bad" rows="2"></textarea></div>
+  <div class="field"><label for="t-next">В следующий раз</label><textarea id="t-next" rows="2"></textarea></div>
+  <div class="field"><label for="t-coach">Тренер сказал</label><textarea id="t-coach" rows="2"></textarea></div>
+  <div class="field"><label>Техники (необязательно)</label><div class="chips" id="t-techs"></div></div>
+  <div class="field"><label for="t-date">Дата</label><input id="t-date" type="date"></div>
+  <button type="submit" class="btn btn-body">Сохранить</button>
+  <button type="button" class="x" id="t-del" hidden style="height:44px">Удалить тренировку</button>
+</form></div>
+
+<div class="sheet" id="s-journal" role="dialog" aria-modal="true" aria-labelledby="sj-t" hidden><form class="sheet-in" id="f-journal">
+  <div class="grip"></div>
+  <div class="row"><h2 id="sj-t">Дневник</h2><button type="button" class="linkish" data-close>Отмена</button></div>
+  <div class="field"><label for="j-main">Главное за день</label><textarea id="j-main" rows="2"></textarea></div>
+  <div class="field"><label for="j-worry">Что беспокоит</label><textarea id="j-worry" rows="2"></textarea></div>
+  <div class="field"><label for="j-learn">Что понял</label><textarea id="j-learn" rows="2"></textarea></div>
+  <div class="field"><label for="j-tom">Завтра изменю</label><textarea id="j-tom" rows="2"></textarea></div>
+  <div class="field"><label for="j-free">Свободно</label><textarea id="j-free" rows="4"></textarea></div>
+  <button type="submit" class="btn btn-journal">Сохранить</button>
+</form></div>
+
+<div class="sheet" id="s-item" role="dialog" aria-modal="true" aria-labelledby="si-t" hidden><form class="sheet-in" id="f-item">
+  <div class="grip"></div>
+  <div class="row"><h2 id="si-t">Запись</h2><button type="button" class="linkish" data-close>Отмена</button></div>
+  <div class="field" id="i-list-wrap"><label for="i-list">Раздел</label><select id="i-list"></select></div>
+  <div class="field"><label for="i-title" id="i-title-l">Название</label><input id="i-title" autocomplete="off"></div>
+  <div class="seg" id="i-status"></div>
+  <div id="i-extra" class="view"></div>
+  <div class="field" id="i-rating-wrap"><label>Оценка</label><div class="stars" id="i-rating"></div></div>
+  <div class="field" id="i-date-wrap"><label for="i-date" id="i-date-l">Дата</label><input id="i-date" type="date"></div>
+  <div class="field" id="i-note-wrap"><label for="i-note">Заметки</label><textarea id="i-note" rows="8"></textarea></div>
+  <div class="field" id="i-link-wrap"><label for="i-link">Ссылка</label><input id="i-link" inputmode="url" autocomplete="off"></div>
+  <a id="i-open" href="#" target="_blank" rel="noopener" class="small" hidden>Открыть ссылку ↗</a>
+  <button type="submit" class="btn btn-idea">Сохранить</button>
+  <button type="button" class="x" id="i-del" hidden style="height:44px">Удалить</button>
+</form></div>
+
+<div class="sheet" id="s-listcfg" role="dialog" aria-modal="true" aria-labelledby="sl-t" hidden><form class="sheet-in" id="f-listcfg">
+  <div class="grip"></div>
+  <div class="row"><h2 id="sl-t">Раздел</h2><button type="button" class="linkish" data-close>Отмена</button></div>
+  <div class="field"><label for="l-name">Название</label><input id="l-name" autocomplete="off"></div>
+  <div id="l-generic" class="view">
+  <div class="field"><label for="l-statuses">Статусы через запятую (первый — для новых записей)</label><input id="l-statuses" autocomplete="off"></div>
+  <div class="toggle"><label for="l-rating">Оценка звёздами</label><input id="l-rating" type="checkbox"></div>
+  <div class="field"><label for="l-datelabel">Поле даты (пусто — без даты)</label><input id="l-datelabel" placeholder="например, Срок" autocomplete="off"></div>
+  </div>
+  <div class="field"><label>Цвет</label><div class="chips" id="l-color"></div></div>
+  <div class="field" id="l-template-wrap"><label for="l-template">Шаблон заметки для новых записей</label><textarea id="l-template" rows="5"></textarea></div>
+  <button type="submit" class="btn btn-idea">Сохранить раздел</button>
+  <button type="button" class="x" id="l-del" hidden style="height:44px">Удалить раздел вместе с записями</button>
+</form></div>
+
+<div class="sheet" id="s-event" role="dialog" aria-modal="true" aria-labelledby="sev-t" hidden><form class="sheet-in" id="f-event">
+  <div class="grip"></div>
+  <div class="row"><h2 id="sev-t">Событие</h2><button type="button" class="linkish" data-close>Отмена</button></div>
+  <div class="field"><label for="ev-title">Название</label><input id="ev-title" autocomplete="off" placeholder="например, AJP"></div>
+  <div class="field"><label for="ev-date">Дата</label><input id="ev-date" type="date"></div>
+  <div class="toggle"><label for="ev-camp">Соревнование: за 30 дней включать кэмп и вес</label><input id="ev-camp" type="checkbox"></div>
+  <div class="field"><label for="ev-weight">Целевой вес, кг (необязательно)</label><input id="ev-weight" inputmode="decimal"></div>
+  <div class="field"><label for="ev-plan">План и описание</label><textarea id="ev-plan" rows="6" placeholder="Для турнира: game plan — стойка, сверху, снизу, что делать при ошибках. Для поездки или встречи: что подготовить, цель."></textarea></div>
+  <div class="field"><label for="ev-result">Итог и выводы (после события)</label><textarea id="ev-result" rows="4"></textarea></div>
+  <div class="card" id="ev-sum" style="background:var(--surface2)" hidden></div>
+  <button type="submit" class="btn btn-body">Сохранить</button>
+  <button type="button" class="x" id="ev-del" hidden style="height:44px">Удалить событие</button>
+</form></div>
+
+<div class="sheet" id="s-tech" role="dialog" aria-modal="true" aria-labelledby="stk-t" hidden><form class="sheet-in" id="f-tech">
+  <div class="grip"></div>
+  <div class="row"><h2 id="stk-t">Техника</h2><button type="button" class="linkish" data-close>Отмена</button></div>
+  <div class="field"><label for="k-name">Название</label><input id="k-name" autocomplete="off"></div>
+  <div class="seg" id="k-status"></div>
+  <div class="metrics">
+    <div class="field"><label for="k-pos">Позиция</label><select id="k-pos"></select></div>
+    <div class="field"><label for="k-belt">Пояс</label><select id="k-belt"><option value="">—</option><option>Белый</option><option>Синий</option></select></div>
+  </div>
+  <div class="field"><label for="k-desc">Описание</label><textarea id="k-desc" rows="8"></textarea></div>
+  <div class="field"><label for="k-cues">Мои подсказки</label><textarea id="k-cues" rows="4"></textarea></div>
+  <div class="field"><label for="k-video">Ссылка на видео</label><input id="k-video" inputmode="url" autocomplete="off"></div>
+  <a id="k-open" href="#" target="_blank" rel="noopener" class="small" hidden>Открыть видео ↗</a>
+  <button type="submit" class="btn btn-body">Сохранить</button>
+  <button type="button" class="x" id="k-del" hidden style="height:44px">Удалить технику</button>
+</form></div>
+
+<div class="sheet" id="s-review" role="dialog" aria-modal="true" aria-labelledby="sr-t" hidden><form class="sheet-in" id="f-review">
+  <div class="grip"></div>
+  <div class="row"><h2 id="sr-t">Обзор недели</h2><button type="button" class="linkish" data-close>Отмена</button></div>
+  <div class="card" style="background:var(--surface2)"><div class="stats4" id="r-auto"></div></div>
+  <div id="r-rates" class="view" style="gap:10px"></div>
+  <div class="metrics">
+    <div class="field"><label for="r-screen">Экран, ч/день</label><input id="r-screen" inputmode="decimal"></div>
+    <div class="field"><label for="r-weight">Вес, кг</label><input id="r-weight" inputmode="decimal"></div>
+  </div>
+  <div class="field"><label for="r-win">Победа недели</label><textarea id="r-win" rows="2"></textarea></div>
+  <div class="field"><label for="r-work">Рабочая победа в цифрах</label><textarea id="r-work" rows="2"></textarea></div>
+  <div class="field"><label for="r-stop">Стоп-лист: что перестать делать</label><textarea id="r-stop" rows="2"></textarea></div>
+  <div class="field"><label for="r-focus">1–3 главные вещи на следующую неделю</label><textarea id="r-focus" rows="3"></textarea></div>
+  <button type="submit" class="btn btn-journal">Сохранить обзор</button>
+</form></div>
+
+<div class="sheet" id="s-bill" role="dialog" aria-modal="true" aria-labelledby="sb-t" hidden><form class="sheet-in" id="f-bill">
+  <div class="grip"></div>
+  <div class="row"><h2 id="sb-t">Регулярный платёж</h2><button type="button" class="linkish" data-close>Отмена</button></div>
+  <div class="field"><label for="b-name">Название</label><input id="b-name" autocomplete="off" placeholder="например, Квартира"></div>
+  <div class="metrics">
+    <div class="field"><label for="b-amt">Сумма</label><input id="b-amt" inputmode="decimal"></div>
+    <div class="field"><label for="b-day">Платить до (число месяца)</label><input id="b-day" inputmode="numeric" placeholder="1–31"></div>
+  </div>
+  <div class="seg" id="b-cur"></div>
+  <div class="field"><label for="b-cat">Категория</label><select id="b-cat"></select></div>
+  <button type="submit" class="btn btn-money">Сохранить</button>
+  <button type="button" class="x" id="b-del" hidden style="height:44px">Удалить платёж</button>
+</form></div>
+
+<div class="sheet" id="s-month" role="dialog" aria-modal="true" aria-labelledby="sm-t" hidden><form class="sheet-in" id="f-month">
+  <div class="grip"></div>
+  <div class="row"><h2 id="sm-t">Обзор месяца</h2><button type="button" class="linkish" data-close>Отмена</button></div>
+  <div class="card" style="background:var(--surface2)"><div class="stats4" id="mo-auto1"></div><div class="stats4" id="mo-auto2"></div></div>
+  <div class="field"><label for="mo-sav">Накопления на конец месяца, $ (всё, что отложено)</label><input id="mo-sav" inputmode="decimal"></div>
+  <div class="small muted" id="mo-savHint"></div>
+  <div class="field"><label for="mo-change">Что изменилось за месяц</label><textarea id="mo-change" rows="2"></textarea></div>
+  <div class="field"><label for="mo-lesson">Главный урок</label><textarea id="mo-lesson" rows="2"></textarea></div>
+  <div class="field"><label>3 фокуса на следующий месяц (появятся на главной)</label>
+    <input id="mo-f1" class="" style="border:1px solid var(--line);background:var(--surface2);border-radius:12px;padding:10px 12px;font-size:16px" aria-label="Фокус 1">
+    <input id="mo-f2" style="border:1px solid var(--line);background:var(--surface2);border-radius:12px;padding:10px 12px;font-size:16px" aria-label="Фокус 2">
+    <input id="mo-f3" style="border:1px solid var(--line);background:var(--surface2);border-radius:12px;padding:10px 12px;font-size:16px" aria-label="Фокус 3"></div>
+  <button type="submit" class="btn btn-journal">Сохранить обзор месяца</button>
+</form></div>
+
+<div class="sheet" id="s-cat" role="dialog" aria-modal="true" aria-labelledby="sc-t" hidden><form class="sheet-in" id="f-cat">
+  <div class="grip"></div>
+  <div class="row"><h2 id="sc-t">Категория</h2><button type="button" class="linkish" data-close>Отмена</button></div>
+  <div class="field"><label for="c-name">Название</label><input id="c-name" autocomplete="off"></div>
+  <div class="small muted" id="c-info"></div>
+  <button type="submit" class="btn btn-money">Сохранить</button>
+  <button type="button" class="x" id="c-del" style="height:44px">Удалить категорию</button>
+</form></div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const KEY="ilimos.v1", CFG="ilimos.cfg";
+const TYPES=["Расход","Доход","Семье","Накопления"], CURS=["₺","сом","$"];
+const TTYPES=["Gi","NoGi","Open mat","Турнир"];
+const TSTATUS=["Работает","Учу","Проблема","Позже"];
+const POS=["Стойка","Проходы","Сверху","Guard","Свипы","Побеги","Сабмишены","Защита"];
+const CURRICULUM=[["c-breakfall", "Страховка при падении (breakfall)", "Белый", "Стойка", "Зачем: чтобы падать на бросках без травм.\n1. Подбородок прижат к груди — голова не касается мата.\n2. Падаешь на спину или бок округлой спиной.\n3. В момент касания бьёшь ладонями и предплечьями по мату под углом ~45° от корпуса.\nОшибка: выставлять прямую руку назад — так ломают локоть и ключицу."], ["c-standup", "Техничный подъём (technical stand-up)", "Белый", "Стойка", "Откуда: сидишь на мате, соперник стоит перед тобой.\n1. Одна рука опирается на мат за спиной, вторая выставлена вперёд как щит.\n2. Противоположная нога стоит стопой на мате.\n3. Поднимаешь бёдра и проносишь опорную ногу назад под себя.\n4. Встаёшь в стойку на дистанции.\nОшибка: вставать вперёд к сопернику — подставляешь голову и ноги."], ["c-double", "Проход в две ноги (double leg)", "Белый", "Стойка", "Откуда: стойка напротив соперника.\n1. Смена уровня — садишься в ногах, спина прямая, голову не опускаешь.\n2. Глубокий шаг передней ногой между его ног, колено на мат.\n3. Голова сбоку от его корпуса, руки обхватывают ноги под коленями.\n4. Толкаешь вперёд и в сторону головы, подбирая ноги, пока он не упадёт.\nОшибка: нырять головой вниз без смены уровня — поймают на гильотину."], ["c-single", "Проход в одну ногу (single leg)", "Белый", "Стойка", "Откуда: соперник выставил переднюю ногу.\n1. Смена уровня, захват его передней ноги, голова прижата к его корпусу.\n2. Поднимаешь ногу и зажимаешь между своими бёдрами или у бедра.\n3. Валишь: подсечка опорной ноги, толчок головой или бег по кругу.\nОшибка: держать ногу низко у стопы — он легко вытащит её и накроет."], ["c-sprawl", "Спроул (защита от прохода в ноги)", "Белый", "Защита", "Когда: соперник проходит в ноги.\n1. Резко выбрасываешь ноги назад и широко, бёдра опускаешь к мату.\n2. Весь вес — на его плечи и голову через грудь.\n3. Руками блокируешь его голову и плечи, underhook не отдаёшь.\n4. Обходишь сбоку на спину или в передний захват.\nОшибка: спроул слишком поздно, когда он уже держит ноги."], ["c-hiptoss", "Бросок через бедро (hip toss, NoGi)", "Белый", "Стойка", "Откуда: underhook или обхват корпуса в клинче.\n1. Underhook одной рукой, второй контролируешь его руку (overhook или запястье).\n2. Подшагиваешь и разворачиваешься спиной к нему, твоё бедро ниже его бедра.\n3. Выпрямляешь ноги и тянешь через бедро — он летит через тебя.\n4. Падаешь сверху в side control.\nОшибка: бедро выше его бедра — поднять не получится."], ["c-snapdown", "Срыв вниз и передний захват (snap down)", "Белый", "Стойка", "Откуда: клинч, руки на его шее или голове.\n1. Резко тянешь голову соперника вниз и назад, отступая.\n2. Он падает на руки — сразу обхватываешь голову и руку спереди (front headlock).\n3. Бёдра далеко, вес на его голове.\n4. Отсюда: гильотина, д'арс, анаконда или обход за спину.\nОшибка: тянуть только руками без шага назад."], ["c-anklepick", "Захват пятки (ankle pick)", "Синий", "Стойка", "Откуда: руки на шее или плече соперника.\n1. Тянешь голову вниз — он делает шаг вперёд, чтобы поймать баланс.\n2. Ныряешь вниз, захватываешь пятку выставленной ноги.\n3. Одновременно толкаешь его голову или плечо назад.\n4. Он садится на мат — проходишь сверху.\nОшибка: забыть про толчок головы — одна тяга пятки не валит."], ["c-uchimata", "Подхват изнутри (uchi-mata, NoGi)", "Синий", "Стойка", "Откуда: overhook одной руки и контроль шеи или underhook.\n1. Разворачиваешься спиной к сопернику, опорная нога глубоко между его ног.\n2. Сильно тянешь его корпус на себя и вниз.\n3. Маховой ногой бьёшь по внутренней стороне его бедра вверх.\n4. Он переворачивается через твою ногу — идёшь в side control.\nОшибка: не загрузить его на себя до удара ногой. Твоя дзюдо-база здесь в плюс."], ["c-bodylocktd", "Бодилок сзади / сбоку и сброс", "Синий", "Стойка", "Откуда: ты сбоку или за спиной соперника в стойке.\n1. Замок руками вокруг его пояса, голова плотно к его спине.\n2. Бёдра опускаешь ниже его бёдер.\n3. Подшагиваешь и садишь его: подсечка сзади за пятку или отрыв и сброс в сторону.\n4. Сразу ставишь крюки или выходишь на спину.\nОшибка: замок высоко на груди — он легко выкрутится."], ["c-pullguard", "Безопасное затягивание в гард", "Белый", "Стойка", "Когда: не хочешь бороться в стойке.\n1. Держи контроль: запястье, underhook или шею.\n2. Садишься прямо к ногам соперника, близко к нему, а не падаешь назад.\n3. Сразу ставишь стопы на его бёдра или закрываешь гард.\nОшибка: садиться далеко — он пройдёт гард сразу."], ["c-mount", "Контроль маунта (mount)", "Белый", "Сверху", "Что это: сидишь на корпусе соперника.\n1. Колени плотно к его бокам, стопы под его бёдрами (крючками) или сзади.\n2. Вес на его бёдрах и груди, а не на коленях.\n3. Руки широко на мате или под головой — для баланса против моста.\n4. Постепенно поднимаешься в высокий маунт — к подмышкам.\nОшибка: сидеть высоко на груди с прямой спиной — легко сбросят мостом."], ["c-side", "Контроль сбоку (side control)", "Белый", "Сверху", "Что это: ты поперёк соперника, грудь к груди.\n1. Одна рука под голову, вторая — под дальнюю руку или у бедра.\n2. Колено у его бедра, чтобы не вернул ногу.\n3. Бёдра низко, давление через плечо в лицо или грудь.\n4. Не давай ему развернуться к тебе на бок.\nОшибка: поднимать бёдра — даёшь место для креветки."], ["c-kob", "Колено на животе (knee on belly)", "Белый", "Сверху", "Откуда: из side control.\n1. Встаёшь, колено ставишь на живот или солнечное сплетение, голень поперёк.\n2. Вторая нога широко в сторону, для баланса.\n3. Руками держишь его руку (underhook) и воротник или плечо.\n4. Если он толкает колено — выход на армбар или маунт.\nОшибка: колено на рёбрах сбоку — нет давления, и он сбросит."], ["c-back", "Контроль спины (seatbelt + крюки)", "Белый", "Сверху", "Что это: ты за его спиной.\n1. Seatbelt: одна рука над его плечом, вторая под подмышкой, замок на груди. Голова прижата к его голове с той же стороны, что нижняя рука.\n2. Стопы крючками заходят внутрь его бёдер.\n3. Грудь прижата к его спине, без щели.\n4. Цель — удушение сзади.\nОшибка: скрестить стопы на его животе — он сделает ключ на стопу."], ["c-ns", "Север-юг (north-south)", "Белый", "Сверху", "Откуда: из side control, обходишь голову.\n1. Твоя грудь на его груди, твоя голова у его пупка, ноги в сторону его головы.\n2. Руки под его руками или вокруг корпуса.\n3. Бёдра низко, двигаешься вместе с ним.\n4. Отсюда кимура или удушение север-юг.\nОшибка: поднимать грудь — он пролезет под тебя."], ["c-cgbreak", "Осанка и раскрытие закрытого гарда", "Белый", "Проходы", "Откуда: ты в закрытом гарде соперника.\n1. Спина прямая, голова вверх, руки на его бёдрах или животе — не на мате.\n2. Колени широко, бёдра вперёд.\n3. Встаёшь одной ногой, потом второй, держа осанку.\n4. Давишь бёдрами вниз и выпрямляешься, пока его ноги не расцепятся.\nОшибка: наклоняться к сопернику — он ломает осанку и атакует."], ["c-toreando", "Торреадор (toreando pass)", "Белый", "Проходы", "Откуда: соперник на спине в открытом гарде, ты стоишь.\n1. Захватываешь его колени или голени сверху.\n2. Резко отбрасываешь ноги в одну сторону и прижимаешь к мату.\n3. Обходишь с другой стороны, колено к его бедру.\n4. Грудь на грудь — side control.\nОшибка: медленно — он вернёт ноги перед собой."], ["c-kneecut", "Проход коленом (knee cut / knee slice)", "Белый", "Проходы", "Откуда: соперник в открытом или халф-гарде.\n1. Контроль: underhook или рука у головы, вторая — на его колене или бедре.\n2. Колено «режет» по его бедру к мату по диагонали.\n3. Заднюю ногу отводишь назад для баланса.\n4. Грудь опускаешь, освобождаешь колено — side control.\nОшибка: нет контроля верха — он берёт underhook и уходит на спину."], ["c-overunder", "Проход «одна над, одна под» (over-under)", "Белый", "Проходы", "Откуда: соперник ставит ноги на твои бёдра или открытый гард.\n1. Одна рука под его ногой, вторая сверху другой ноги.\n2. Плечо давит в бедро нижней ноги, складывая его.\n3. Замок руками вокруг бедра, голова прижата.\n4. Медленно обходишь сторону верхней руки, не отпуская давления.\nОшибка: торопиться — давление тут важнее скорости."], ["c-stack", "Проход со стэком (stack / double under)", "Белый", "Проходы", "Откуда: соперник в закрытом гарде или атакует треугольником.\n1. Две руки под его бёдрами, замок.\n2. Встаёшь на носки и складываешь его на плечи — колени к лицу.\n3. Ноги отводишь в одну сторону.\n4. Обходишь в side control.\nОшибка: голова внутри его ног — лёгкий треугольник."], ["c-bodylock", "Бодилок-проход (body lock pass)", "Белый", "Проходы", "Откуда: соперник в закрытом, бабочке или халф-гарде. Главный NoGi-проход.\n1. Замок руками вокруг его поясницы, голова в центре на груди.\n2. Бёдра прижаты, колени широко — прижимаешь его бёдра к мату.\n3. Одну ногу освобождаешь через колено или шагом.\n4. Выходишь в маунт или side control.\nОшибка: замок высоко на груди — он двигает бёдрами и уходит."], ["c-legdrag", "Лег-драг (leg drag)", "Синий", "Проходы", "Откуда: соперник поднял ноги или отталкивает тебя.\n1. Хватаешь его ногу, перетаскиваешь через своё бедро на другую сторону.\n2. Прижимаешь его бедро своим бедром к мату.\n3. Рука под головой или underhook.\n4. Переходишь в side control или берёшь спину, если он отворачивается.\nОшибка: оставить щель между бёдрами — он вернёт гард."], ["c-smash", "Проход халф-гарда давлением (smash pass)", "Синий", "Проходы", "Откуда: ты в его халф-гарде.\n1. Выигрываешь underhook, плечом давишь в его лицо, поворачивая голову.\n2. Свободной ногой встаёшь или ставишь колено на его колено.\n3. Вытаскиваешь зажатую ногу — через колено или «походкой».\n4. Фиксируешь side control или маунт.\nОшибка: отдать underhook — он сделает свип."], ["c-longstep", "Длинный шаг (long step)", "Синий", "Проходы", "Откуда: давление на его бёдрах или халф-гард.\n1. Прижимаешь его бёдра, голова на его груди.\n2. Делаешь длинный шаг ногой назад и в сторону, обходя его ноги.\n3. Бёдра опускаешь, садишься сбоку.\n4. Side control.\nОшибка: шаг без давления грудью — он повернётся за тобой."], ["c-xpass", "Икс-проход (X-pass)", "Синий", "Проходы", "Откуда: соперник в бабочке или открытом гарде.\n1. Колено одной ноги ставишь внутрь между его ногами.\n2. Руки на его коленях.\n3. Резко обходишь в противоположную сторону от колена, отталкивая ноги.\n4. Side control.\nОшибка: застрять коленом внутри — он зацепит крюком."], ["c-cg", "Закрытый гард (closed guard)", "Белый", "Guard", "Что это: твои ноги замкнуты за его спиной.\n1. Ломай его осанку: тяни голову и руки к себе, колени к груди.\n2. Контролируй запястья или underhook, overhook.\n3. Не лежи плоско — двигай бёдрами под углом.\n4. Атакуй: свипы, кимура, гильотина, армбар, треугольник.\nОшибка: просто держать гард и ждать — он раскроет."], ["c-half", "Халф-гард снизу (half guard)", "Синий", "Guard", "Что это: одна его нога между твоими.\n1. Колено-щит в его грудь или живот — держит дистанцию.\n2. Или underhook — главная цель снизу.\n3. Лёжа на боку, а не на спине.\n4. С underhook: уходишь под него в олдскул-свип или на спину.\nОшибка: лежать плоско без underhook — он раздавит сверху."], ["c-butterfly", "Баттерфляй-гард (butterfly guard)", "Синий", "Guard", "Что это: ты сидишь, стопы-крючки внутри его бёдер.\n1. Сидишь прямо, грудь вперёд.\n2. Один underhook, другой рукой контролируешь его руку или голову.\n3. Держи дистанцию: локти внутрь, чтобы он не прижал.\n4. Отсюда баттерфляй-свип, заход на спину, гильотина.\nОшибка: откинуться на спину — теряешь силу крюков."], ["c-dlr", "Де Ла Рива (NoGi)", "Синий", "Guard", "Что это: открытый гард против стоящего соперника.\n1. Одна нога обвивает его ногу снаружи, стопа крючком изнутри бедра.\n2. Рукой держишь пятку этой ноги.\n3. Второй стопой толкаешь его бедро или вторую ногу.\n4. Свипы — выбиваешь опору, заход на спину (берибол — позже).\nОшибка: отпустить пятку — он отбросит ногу и пройдёт."], ["c-slx", "Сингл-лег-икс (single leg X)", "Синий", "Guard", "Что это: ты под ним, ноги крест-накрест вокруг одной его ноги.\n1. Его нога между твоими, одна стопа на его бедре, другая — за коленом.\n2. Его стопу держишь под мышкой.\n3. Толкаешь бедро и тянешь ногу — он падает, ты встаёшь.\n4. Или вход в ключ на стопу.\nОшибка: слабый контроль стопы — он выдернет ногу."], ["c-kguard", "К-гард (K-guard)", "Синий", "Guard", "Что это: современный NoGi-гард для входа в ноги и спину.\n1. Соперник в халф- или открытом гарде, ты на боку под углом.\n2. Одна нога поперёк его бедра изнутри, другая за его ногой снаружи — буква «К».\n3. Рука держит его пятку или колено.\n4. Выход на спину или в ногу.\nОшибка: учить до уверенного закрытого гарда и бабочки — рано."], ["c-hipbump", "Свип толчком бедра (hip bump)", "Белый", "Свипы", "Откуда: закрытый гард, соперник сидит прямо.\n1. Раскрываешь гард, садишься, одна рука опирается на мат позади.\n2. Вторая рука через его плечо, обнимает корпус.\n3. Бедром резко толкаешь его вверх и в сторону опорной руки.\n4. Он падает — ты сверху в маунте.\nСвязка: если он опирается рукой — кимура, если наклоняется — гильотина."], ["c-scissor", "Свип ножницами (scissor sweep)", "Белый", "Свипы", "Откуда: закрытый гард.\n1. Раскрываешь гард, уходишь на бок.\n2. Верхняя голень поперёк его живота, колено у его подмышки.\n3. Нижняя нога прижата к мату у его колена.\n4. Тянешь его за руку и шею на себя, верхней ногой толкаешь, нижней — подсекаешь колено. Выходишь в маунт.\nОшибка: не загрузить его вес на голень перед подсечкой."], ["c-flower", "Маятник (flower / pendulum sweep)", "Белый", "Свипы", "Откуда: закрытый гард.\n1. Захват его руки (запястье или трицепс) на твоей стороне.\n2. Раскрываешь гард, эта же рука захватывает его ногу под коленом.\n3. Мах другой ногой широко — как маятник, одновременно тянешь ногу.\n4. Он перекатывается, ты в маунте.\nОшибка: не держать его руку — он упрётся и не упадёт."], ["c-oldschool", "Олдскул-свип (old school sweep)", "Синий", "Свипы", "Откуда: халф-гард снизу с underhook.\n1. Underhook, уходишь на бок, под него.\n2. Свободной рукой захватываешь его ступню или голень зажатой ноги.\n3. Выходишь коленом, подъём на колени.\n4. Толкаешь его в сторону, где держишь ногу — он падает, ты сверху.\nОшибка: без underhook не сработает."], ["c-butterflysweep", "Баттерфляй-свип (butterfly sweep)", "Синий", "Свипы", "Откуда: баттерфляй-гард.\n1. Underhook одной рукой, другой держишь его руку с той же стороны (overhook или трицепс).\n2. Падаешь на бок — в сторону захваченной руки.\n3. Крюком на противоположной стороне поднимаешь его бедро.\n4. Он перекатывается через тебя, ты выходишь сверху.\nОшибка: падать на спину, а не на бок."], ["c-tripod", "Трипод-свип (tripod sweep)", "Синий", "Свипы", "Откуда: открытый гард, соперник стоит.\n1. Одной рукой хватаешь его пятку, одноимённая стопа — за его пяткой снаружи.\n2. Вторая стопа — на его бедро с другой стороны.\n3. Толкаешь бедро и тянешь пятку — он садится назад.\n4. Встаёшь и проходишь.\nСвязка: если он делает шаг назад — серп."], ["c-sickle", "Серп (sickle sweep)", "Синий", "Свипы", "Откуда: тот же захват, что в триподе.\n1. Держишь его пятку рукой.\n2. Одна нога под его опорной ногой сзади.\n3. Вторая нога подсекает пятку опорной ноги.\n4. Он падает назад, ты встаёшь сверху.\nИспользуй в паре с триподом: защищается от одного — попадает на другой."], ["c-dogfight", "Дог-файт из халф-гарда (dogfight)", "Синий", "Свипы", "Откуда: халф-гард с underhook, ты вышел на колени.\n1. Сидишь на коленях рядом с ним, underhook глубоко, голова прижата к его боку.\n2. Свободной рукой держишь его дальнее колено или бедро.\n3. Толкаешь вперёд и в сторону — переворот; или обход на спину.\nОшибка: голова снаружи — он давит сверху."], ["c-armbarcg", "Армбар из закрытого гарда", "Белый", "Сабмишены", "Откуда: закрытый гард, его рука на твоей груди или на мате.\n1. Двумя руками держишь его запястье у своей груди.\n2. Ставишь стопу на его бедро со стороны другой руки, разворачиваешь бёдра под 90°.\n3. Нога закидывается через его голову, колени сжаты.\n4. Большой палец его руки вверх, поднимаешь бёдра — давление в локоть.\nОшибка: оставить щель между его рукой и твоим тазом — выдернет руку."], ["c-trianglecg", "Треугольник из закрытого гарда (triangle)", "Белый", "Сабмишены", "Откуда: одна его рука внутри гарда, другая снаружи.\n1. Толкаешь одну руку назад к его животу, другую держишь.\n2. Нога закидывается через его шею, выше плеча.\n3. Замок: подколенка одной ноги на стопе другой.\n4. Разворот под углом, тянешь его голову вниз и сжимаешь колени.\nОшибка: обе руки внутри или обе снаружи — удушения нет."], ["c-kimuracg", "Кимура из гарда", "Белый", "Сабмишены", "Откуда: закрытый гард, он поставил руку на мат.\n1. Одной рукой хватаешь его запястье.\n2. Садишься, вторая рука через его плечо — хватает своё запястье (замок «фигура-4»).\n3. Опускаешься назад на бок, его локоть прижат к тебе.\n4. Вращаешь его руку за спину — плечо.\nОшибка: слабое прижатие локтя — выкрутит руку."], ["c-guillotine", "Гильотина (guillotine)", "Белый", "Сабмишены", "Откуда: его голова опущена — проход в ноги или из гарда.\n1. Рука обхватывает шею, запястье — под подбородком, острым краем в горло.\n2. Замок второй рукой (ладонь в ладонь или в хват за своё запястье).\n3. Закрываешь гард или прижимаешь его корпус.\n4. Тянешь запястье к своей груди и выгибаешься.\nВарианты: arm-in (с рукой внутри) и high-elbow (локоть вверх) — самые надёжные в NoGi."], ["c-americana", "Американа (americana)", "Белый", "Сабмишены", "Откуда: side control или маунт.\n1. Прижимаешь его запястье к мату у головы, рука согнута под 90°.\n2. Вторая рука проходит под его локтем и хватает твоё запястье.\n3. Держишь его локоть прижатым к мату.\n4. Тянешь его запястье к его бедру, поднимая локоть — давление в плечо.\nОшибка: поднимать его запястье с мата."], ["c-armbarmount", "Армбар из маунта", "Белый", "Сабмишены", "Откуда: высокий маунт, он толкает тебя руками.\n1. Прижимаешь одну руку к своей груди.\n2. Поворачиваешься на колено на её сторону, вторая нога через его голову.\n3. Садишься рядом с его плечом, колени сжаты.\n4. Откидываешься назад, его большой палец вверх — давление в локоть.\nОшибка: сидеть далеко от его плеча — рука выскочит."], ["c-rnc", "Удушение сзади (rear naked choke)", "Белый", "Сабмишены", "Откуда: контроль спины.\n1. Рука проходит под его подбородком, локоть под подбородком.\n2. Кисть этой руки — на бицепс второй руки.\n3. Вторая ладонь — за его затылок.\n4. Сжимаешь локти, прижимая грудь к его спине.\nОшибка: давить на челюсть, а не на шею. Сначала спрячь подбородок — контролируй руки."], ["c-armtriangle", "Треугольник руками (arm triangle / head-arm choke)", "Белый", "Сабмишены", "Откуда: маунт или side control, его рука выше головы.\n1. Толкаешь его руку через его лицо, голова прижата к ней.\n2. Рука под его шеей, замок ладонь в ладонь.\n3. Спрыгиваешь в сторону, противоположную его руке, — ложишься сбоку.\n4. Сжимаешь, давя плечом.\nОшибка: оставаться на той же стороне — давления не будет."], ["c-ezekiel", "Иезекииль (NoGi ezekiel)", "Синий", "Сабмишены", "Откуда: маунт или даже внутри его гарда.\n1. Одна рука обхватывает его шею сзади.\n2. Ладонь этой руки хватает запястье второй руки.\n3. Вторая рука ребром ладони или предплечьем — поперёк горла.\n4. Сводишь руки, как ножницы.\nОшибка: давить в подбородок — нужно в шею."], ["c-omoplata", "Омоплата (omoplata)", "Синий", "Сабмишены", "Откуда: закрытый гард, его рука у бедра.\n1. Бёдра под углом, нога закидывается через его плечо снаружи.\n2. Разворачиваешься, ногами прижимаешь его плечо.\n3. Садишься, рука через его талию, чтобы не укатился.\n4. Двигаешь бёдра вперёд — давление в плечо.\nЧасто работает как свип, если он перекатывается."], ["c-darce", "Д'арс (d'arce choke)", "Синий", "Сабмишены", "Откуда: передний захват головы или его underhook в халф-гарде.\n1. Рука проходит под его подмышкой и вокруг шеи сзади.\n2. Ладонь хватает бицепс второй руки, вторая ладонь — за его спину.\n3. Прижимаешь плечом, выходишь на бок.\n4. Сжимаешь, сведя локти.\nОшибка: неглубоко пройти рукой — удушения нет."], ["c-anaconda", "Анаконда (anaconda choke)", "Синий", "Сабмишены", "Откуда: передний захват головы, он на коленях.\n1. Рука под шеей и через его подмышку, как в д'арс, но с другой стороны.\n2. Замок на бицепсе второй руки.\n3. Перекатываешься через плечо под него.\n4. Сжимаешь, разворачиваясь к его ногам.\nОшибка: без переката он не упадёт в удушение."], ["c-ankle", "Прямой ключ на стопу (straight ankle lock)", "Синий", "Сабмишены", "Откуда: сингл-лег-икс или его нога между твоими.\n1. Его стопа под мышкой, пятка у тебя за спиной.\n2. Предплечье под его ахиллом — острым краем кости.\n3. Замок: кисть на своё предплечье или отворот.\n4. Выгибаешься назад, давя предплечьем в ахилл.\nОшибка: захват на икре, а не на ахилле. Отпускай сразу при хлопке."], ["c-nschoke", "Удушение север-юг (north-south choke)", "Синий", "Сабмишены", "Откуда: север-юг.\n1. Одна рука обхватывает его шею сбоку (под головой).\n2. Твоя подмышка на его горле.\n3. Опускаешь бёдра и вес, голова в сторону.\n4. Давишь плечом и подмышкой, сжимая руку.\nНужна точность угла — сначала отработай позицию."], ["c-kimuratrap", "Кимура-трап (kimura trap)", "Синий", "Сабмишены", "Что это: замок кимуры как система контроля, а не только сабмишен.\n1. Замок «фигура-4» на его руке из любой позиции.\n2. Используешь его, чтобы перевернуть, пройти гард или взять спину.\n3. Если рука откроется — дожимаешь кимуру.\nИз гарда, халф-гарда, север-юг и черепахи."], ["c-upa", "Мост и переворот из-под маунта (upa)", "Белый", "Побеги", "Откуда: ты под маунтом.\n1. Захватываешь его руку с одной стороны, прижимаешь к своей груди.\n2. Стопой той же стороны блокируешь его ногу.\n3. Резкий мост бёдрами вверх и через плечо — в сторону захвата.\n4. Он переворачивается, ты в его гарде — сразу осанка.\nОшибка: мост без блока руки и ноги — он поставит опору."], ["c-elbowknee", "Побег локоть-колено из-под маунта (shrimp)", "Белый", "Побеги", "Откуда: ты под маунтом.\n1. Локти прижаты, руки упираются в его бёдра.\n2. Креветка — отводишь бёдра в сторону, поворачиваясь на бок.\n3. Колено нижней ноги проводишь под его бедро.\n4. Возвращаешь халф-гард, потом полный гард.\nОшибка: вытягивать руки к его груди — армбар."], ["c-sideesc", "Побег из-под side control", "Белый", "Побеги", "Откуда: он в side control.\n1. Фреймы: одно предплечье в его шею, другое в бедро.\n2. Креветка от него, освобождая место.\n3. Колено заводишь внутрь между вами.\n4. Возвращаешь гард или переходишь на колени и встаёшь.\nОшибка: толкать его руками со прямыми локтями — только теряешь силы."], ["c-backesc", "Побег со спины", "Белый", "Побеги", "Откуда: он за спиной с крюками.\n1. Первым делом защищаешь шею: руки у горла, подбородок вниз.\n2. Снимаешь нижний крюк.\n3. Сползаешь плечами на мат в сторону его верхней руки.\n4. Поворачиваешься к нему, возвращаешь гард или выходишь сверху.\nОшибка: крутиться в сторону нижней руки — он закроет удушение."], ["c-retention", "Удержание гарда (guard retention)", "Белый", "Побеги", "Что это: не дать пройти гард.\n1. Держи колени и локти близко — «закрытая» позиция.\n2. Фреймы руками в плечи или голову.\n3. Креветка и вращение, чтобы ноги всегда были перед ним.\n4. Когда он проходит — возвращай колено внутрь.\nОшибка: лежать плоско и ждать — давай движение."], ["c-turtle", "Выход из черепахи (turtle recovery)", "Синий", "Побеги", "Откуда: ты в черепахе — на коленях и локтях.\n1. Локти прижаты к коленям, шея защищена — не давай крюки.\n2. Гранби-перекат: катишься через плечо на спину и возвращаешь гард.\n3. Или сит-аут: одну ногу выносишь вперёд под себя и разворачиваешься к нему.\nОшибка: оставлять щель между локтем и коленом — он поставит крюк."], ["c-posture", "Осанка в закрытом гарде", "Белый", "Защита", "Что это: основа защиты сверху в гарде.\n1. Спина прямая, голова вверх, взгляд вперёд.\n2. Руки на его животе или бёдрах — не ставь их на мат.\n3. Локти близко к корпусу, колени широко.\n4. Если он ломает осанку — сразу восстанавливай, толкая бёдра вперёд.\nОшибка: рука на мате — армбар или кимура."], ["c-triangledef", "Защита от треугольника", "Белый", "Защита", "Когда: он закидывает ногу на шею.\n1. Держи осанку — голова вверх.\n2. Рука, которая внутри, — локоть к своему корпусу, не отдавай её.\n3. Встань и дави вперёд — стэк, колени к его лицу.\n4. Выведи вторую руку тоже внутрь или вытащи голову.\nОшибка: тянуть голову назад, когда замок уже закрыт."], ["c-guildef", "Защита от гильотины", "Белый", "Защита", "Когда: он схватил шею.\n1. Рука за его плечо с той стороны, где душит.\n2. Второй рукой тяни его запястье вниз.\n3. Подбородок в грудь, голова к его груди.\n4. Проходи в сторону душащей руки и дави весом на его грудь.\nОшибка: вытягивать голову назад силой."], ["c-armbardef", "Защита от армбара из закрытого гарда", "Белый", "Защита", "Когда: он делает армбар снизу. Твоя проблема с марта.\n1. Не тяни руку назад прямо — он этого и ждёт.\n2. Сцепи руки (свою ладонь на свой бицепс или замок).\n3. Разверни большой палец вниз, локоть к его бедру.\n4. Давь вперёд — стэк: его вес на плечи, колени к лицу.\n5. Вытаскивай руку, двигаясь к его голове, а не назад.\nОшибка: вытягивать руку с прямым локтем."], ["c-legdef", "Защита от ключа на стопу", "Синий", "Защита", "Когда: он захватил стопу.\n1. Стопу выпрямляй вверх, пяткой к нему.\n2. Садись к нему, не лежи.\n3. Второй ногой толкай его бедро.\n4. Освобождай стопу через его локоть, в сторону его ладони.\nОшибка: крутиться в сторону ключа. Хлопай вовремя."]];
+const LEVERS=[["body","Тело"],["money","Доход"],["family","Семья"],["faith","Вера"],["growth","Рост"]];
+const COLORS=["body","money","journal","idea","blue","sand"];
+const CAT_COLORS=["--sand","--idea","--blue","--money","--body","--journal","--grey"];
+
+/* ---------- defaults (fixed ids so every device seeds the same records) ---------- */
+const DEFAULTS={
+  settings:{main:{rateTRY:49,rateKGS:87.45,focus:["AJP 17 октября — не повторить мартовскую ошибку","Посчитать свою ценность для DAMIR в цифрах","Каждый вечер чек-ин и расходы"],cats:["Жильё","Коммуналка и связь","Продукты","Кафе и доставка","Транспорт","Такси","Спорт и BJJ","Здоровье","Сигареты","Одежда","Отношения","Люди и подарки","Путешествия","Обучение","Подписки","Техника","Быт","Развлечения","Документы и визы","Прочее"],incCats:["Зарплата","Бонус и комиссия","Подработка","Проекты и фриланс","Продажа вещей","Вернули долг","Подарок","Кэшбэк и проценты","Другое"]}},
+  events:{ajp:{title:"AJP",date:"2026-10-17",camp:true,weight:77}},
+  lists:{
+    goals:{name:"Цели",kind:"goals",color:"money",order:1,template:"Зачем мне это:\n\nКак пойму, что готово:"},
+    work:{name:"Работа и карьера",kind:"work",color:"blue",order:2,template:"Что предлагают:\n\nПочему интересно:"},
+    books:{name:"Книги",kind:"books",color:"sand",order:3,template:"О чём она:\n\nЧто поменялось в мышлении:\n\nС чем не согласен:\n\nЧто вспомню через год:"},
+    decisions:{name:"Решения",kind:"decisions",color:"body",order:4,template:"Варианты:\n\nКритерии (что реально важно):\n\nФакты:\n\nЭмоции и страхи:"},
+    thoughts:{name:"Мысли",kind:"thoughts",color:"idea",order:5,template:""},
+    movies:{name:"Фильмы и сериалы",kind:"generic",color:"journal",order:6,statuses:["Хочу","Смотрю","Посмотрел"],rating:true,dateLabel:"",template:"Что запомнилось:"},
+    travel:{name:"Путешествия",kind:"generic",color:"blue",order:7,statuses:["Мечта","Планирую","Был"],rating:false,dateLabel:"Когда",template:"Бюджет:\nДокументы:\nМаршрут:\nВпечатления:"}
+  },
+  techniques:{
+    "armbar-def":{name:"Защита от armbar из closed guard",status:"Проблема",pos:"Защита",cues:"Март 2026: тянул и выпрямлял руку — попался. Не выдёргивать руку прямо: сцепить руки, развернуть большой палец, стэк и давление вперёд. Спросить тренера про правильный escape.",video:""},
+    podhvat:{name:"Подхват влево",status:"Работает",pos:"Стойка",cues:"База из дзюдо",video:""},
+    zadnyaya:{name:"Задняя подножка влево",status:"Работает",pos:"Стойка",cues:"База из дзюдо",video:""},
+    armdrag:{name:"Arm drag на правую руку",status:"Учу",pos:"Стойка",cues:"",video:""},
+    pressure:{name:"Давление сверху",status:"Работает",pos:"Сверху",cues:"",video:""},
+    armtriangle:{name:"Arm triangle",status:"Работает",pos:"Сабмишены",cues:"",video:""},
+    kimura:{name:"Kimura",status:"Работает",pos:"Сабмишены",cues:"",video:""},
+    "mount-escape":{name:"Выход из-под mount",status:"Учу",pos:"Побеги",cues:"",video:""},
+    sweeps:{name:"Свипы",status:"Учу",pos:"Guard",cues:"Записать, какие именно получаются",video:""}
+  }
+};
+
+/* ---------- section kinds: each has its own fields, statuses and screen ---------- */
+const KINDS={
+  books:{statuses:["Хочу","Читаю","Прочитал","Бросил"],rating:true,titleL:"Название книги",
+    fields:[["author","text","Автор"],["stage","seg","Этап",["Начал","Треть","Половина","Почти всё"]],["ideas","area","Главные идеи — каждая с новой строки"],["apply","area","Что применю в жизни"],["started","date","Начал"],["finished","date","Дочитал"]]},
+  work:{statuses:["Интересно","Написал","Интервью","Оффер","Закрыто"],titleL:"Должность / вакансия",
+    fields:[["company","text","Компания"],["contact","text","Контакт (имя, телеграм, почта)"],["next","text","Следующий шаг"],["followup","date","Follow-up (когда напомнить)"]]},
+  goals:{statuses:["Активна","Пауза","Готово"],titleL:"Цель",
+    fields:[["horizon","seg","Горизонт",["Месяц","Квартал","Год","5 лет"]],["progress","range","Прогресс"],["focus","bool","В фокусе — показывать на главной"],["next","text","Следующий шаг"],["deadline","date","Срок"]]},
+  decisions:{statuses:["Думаю","Решено","Проверено"],titleL:"Вопрос одной фразой",
+    fields:[["decideBy","date","Решить до (дедлайн против бесконечного анализа)"],["decision","area","Решение и почему"],["confidence","seg","Уверенность",["Низкая","Средняя","Высокая"]],["decidedOn","date","Когда решил"],["verdict","seg","Через 90 дней: было верно?",["—","Верно","Спорно","Ошибка"]]]},
+  thoughts:{statuses:["Мысль","Бизнес-идея","Урок","Для системы"],titleL:"Мысль",fields:[],noNote:true}
+};
+const LEGACY_KIND={books:"books",work:"work",thoughts:"thoughts",decisions:"decisions",goals:"goals"};
+const kindOf=l=>l&&(l.kind||LEGACY_KIND[l.id])||"generic";
+const statusesOf=l=>(KINDS[kindOf(l)]||{}).statuses||(l&&l.statuses)||[];
+
+/* ---------- local-first store with sync queue ---------- */
+let store={data:{},queue:[],seeded:false,lastSync:0,seq:0};
+let cfg={url:"",token:""};
+try{ const s=JSON.parse(localStorage.getItem(KEY)||"null"); if(s&&s.data) store={...store,...s}; }catch(e){}
+try{ const c=JSON.parse(localStorage.getItem(CFG)||"null"); if(c) cfg={...cfg,...c}; }catch(e){}
+function persist(){ try{ localStorage.setItem(KEY,JSON.stringify(store)); }catch(e){ toast("Память телефона переполнена — сделай копию в Настройках"); } }
+const col=c=>store.data[c]||(store.data[c]={});
+const vals=c=>Object.values(col(c));
+const settings=()=>({...DEFAULTS.settings.main,...(col("settings").main||{})});
+function enqueue(op){ store.queue=store.queue.filter(o=>!(o.col===op.col&&o.id===op.id)); op.seq=++store.seq; store.queue.push(op); }
+function put(c,id,doc,quiet){ doc={...doc,id,updated:Date.now()}; col(c)[id]=doc; enqueue({op:"set",col:c,id,doc}); persist(); if(!quiet) render(); scheduleFlush(); return doc; }
+function del(c,id){ delete col(c)[id]; enqueue({op:"delete",col:c,id}); persist(); render(); scheduleFlush(); }
+function seedDefaults(){ for(const c in DEFAULTS) for(const id in DEFAULTS[c]) if(!col(c)[id]) put(c,id,{...DEFAULTS[c][id]},true); store.seeded=true; store.m2=true; seedCurriculum(); persist(); render(); }
+const CUR_MERGE={"c-armtriangle":"armtriangle","c-elbowknee":"mount-escape","c-armbardef":"armbar-def"};
+const CUR_GI=["c-ogoshi","c-crosscollar","c-bowarrow","c-loop","c-bat","c-clock","c-spider","c-lasso","c-collarsleeve","c-wrist"];
+function seedCurriculum(){ if(store.cv===2) return; const T=col("techniques");
+  const clean=o=>{ const d={...o}; delete d.id; delete d.updated; return d; };
+  for(const id of CUR_GI){ const t=T[id]; if(t&&t.status==="Позже"&&!t.cues&&!t.video) del("techniques",id); else if(t) put("techniques",id,{...clean(t),belt:""},true); }
+  for(const [id,name,belt,pos,desc] of CURRICULUM){ const own=CUR_MERGE[id]&&T[CUR_MERGE[id]];
+    if(own){ put("techniques",own.id,{...clean(own),name,belt,pos,desc},true); if(T[id]) del("techniques",id); continue; }
+    const t=T[id]; put("techniques",id,t?{...clean(t),name,belt,pos,desc}:{name,belt,pos,desc,status:"Позже",cues:"",video:""},true); }
+  for(const [id,belt] of [["armdrag","Белый"],["pressure","Белый"],["kimura","Белый"]]) if(T[id]&&!T[id].belt) put("techniques",id,{...clean(T[id]),belt},true);
+  store.cv=2; store.m3=true; persist(); }
+function migrate(){ seedCurriculum(); if(store.m2) return; const L=col("lists");
+  for(const id in DEFAULTS.lists){ if(!L[id]) put("lists",id,{...DEFAULTS.lists[id]},true); else if(!L[id].kind&&LEGACY_KIND[id]) put("lists",id,{...L[id],kind:LEGACY_KIND[id]},true); }
+  store.m2=true; persist(); }
+
+/* ---------- sync with Google Apps Script ---------- */
+let flushing=false, flushTimer=null;
+function setSync(s,t){ $("#sync").dataset.s=s; $("#syncText").textContent=t; }
+function syncLabel(){ if(!cfg.url){ setSync("local","только на этом устройстве"); return; }
+  if(store.queue.length) setSync("err",`не отправлено: ${store.queue.length}`); else setSync("ok","синхронизировано"); }
+function scheduleFlush(){ clearTimeout(flushTimer); flushTimer=setTimeout(flush,700); syncLabel(); }
+async function flush(){
+  if(!cfg.url||flushing||!store.queue.length){ syncLabel(); return; }
+  flushing=true; setSync("busy","сохраняю…");
+  const ops=store.queue.slice(0,150), sent=new Set(ops.map(o=>o.seq));
+  try{
+    const r=await fetch(cfg.url,{method:"POST",body:JSON.stringify({token:cfg.token,ops:ops.map(({op,col,id,doc})=>({op,col,id,doc}))})});
+    const j=await r.json(); if(!j.ok) throw new Error(j.error||"bad");
+    store.queue=store.queue.filter(o=>!sent.has(o.seq)); store.lastSync=Date.now(); persist();
+  }catch(e){ flushing=false; setSync("err",navigator.onLine?"ошибка синхронизации":"нет сети — сохранено в телефоне"); setTimeout(flush,30000); return; }
+  flushing=false; if(store.queue.length) flush(); else syncLabel();
+}
+function commitDay(){ if(!dayTimer) return; clearTimeout(dayTimer); dayTimer=null; const k=pendingDay; if(k&&col("days")[k]) put("days",k,{...col("days")[k]},true); }
+async function pull(){
+  if(!cfg.url) return false; commitDay();
+  setSync("busy","загружаю…");
+  try{
+    const r=await fetch(cfg.url+(cfg.url.includes("?")?"&":"?")+"token="+encodeURIComponent(cfg.token));
+    const j=await r.json(); if(!j.ok) throw new Error(j.error||"bad");
+    const next={};
+    for(const c in j.data){ next[c]={}; for(const d of j.data[c]) if(d&&d.id!=null) next[c][d.id]=d; }
+    for(const o of store.queue){ next[o.col]=next[o.col]||{}; if(o.op==="set") next[o.col][o.id]=o.doc; else delete next[o.col][o.id]; }
+    const serverHadLists=j.data.lists&&j.data.lists.length;
+    store.data=next; store.lastSync=Date.now(); persist();
+    if(!serverHadLists&&!Object.keys(col("lists")).length) seedDefaults(); else { store.seeded=true; migrate(); persist(); }
+    render(); flush(); return true;
+  }catch(e){ setSync("err",e.message==="auth"?"неверный ключ":(navigator.onLine?"таблица не отвечает":"нет сети — работаю офлайн")); return false; }
+}
+
+/* ---------- dates & numbers ---------- */
+const pad=n=>String(n).padStart(2,"0");
+const ymd=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const today=()=>ymd(new Date());
+const parseD=s=>{const [y,m,d]=String(s).split("-").map(Number);return new Date(y,m-1,d);};
+const addDays=(s,n)=>{const d=parseD(s);d.setDate(d.getDate()+n);return ymd(d);};
+const monday=s=>{const d=parseD(s);d.setDate(d.getDate()-(d.getDay()+6)%7);return ymd(d);};
+const num=v=>{if(v===""||v==null)return null;const n=parseFloat(String(v).replace(/\s/g,"").replace(",","."));return isFinite(n)?n:null;};
+const fmt=(n,d=1)=>n==null||!isFinite(n)?"—":n.toLocaleString("ru-RU",{maximumFractionDigits:d});
+const usd=n=>(n<0?"−$":"$")+Math.round(Math.abs(n)).toLocaleString("ru-RU");
+const MONTHS=["январь","февраль","март","апрель","май","июнь","июль","август","сентябрь","октябрь","ноябрь","декабрь"];
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+const daysTo=s=>Math.round((parseD(s)-parseD(today()))/864e5);
+const plural=(n,a,b,c)=>{n=Math.abs(n)%100;const m=n%10;return n>10&&n<20?c:m>1&&m<5?b:m===1?a:c;};
+
+function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,2200);}
+
+/* ---------- navigation ---------- */
+const TITLES={today:"Сегодня",progress:"Прогресс",bjj:"BJJ",lists:"Разделы",settings:"Настройки"};
+let bjjView="В работе", tab="today", curDay=today(), monthSel=null, openList=null, listFilter="Все", listSearch="";
+function setTab(t){ tab=t; $("#evRow").hidden=t!=="today"||!upcoming().length; for(const k in TITLES) $("#v-"+k).hidden=k!==t;
+  $$(".tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.go===t?"page":"false"));
+  $("#viewTitle").textContent=t==="lists"&&openList&&col("lists")[openList]?col("lists")[openList].name:TITLES[t];
+  try{sessionStorage.setItem("tab",t);}catch(e){} window.scrollTo(0,0); }
+document.addEventListener("click",e=>{const b=e.target.closest("[data-go]"); if(b){ if(b.dataset.go==="lists"&&tab==="lists"){openList=null;renderLists();} setTab(b.dataset.go);} });
+
+/* ---------- calculations ---------- */
+function daysIn(wk){ const out=[]; for(let i=0;i<7;i++){ const d=col("days")[addDays(wk,i)]; if(d) out.push(d);} return out; }
+function wAvg(wk,f){ return avg(daysIn(wk).map(x=>x[f]).filter(v=>typeof v==="number")); }
+function wBjj(wk){ const end=addDays(wk,6); return vals("trainings").filter(t=>t.date>=wk&&t.date<=end).length; }
+function weekKeys(n){ const k=[]; let w=monday(today()); for(let i=0;i<n;i++){ k.unshift(w); w=addDays(w,-7);} return k; }
+const itemUsd=it=>it.cur==="$"?it.amt:it.amt/(it.rate||1);
+function monthItems(mk){ return vals("money").filter(i=>String(i.date).slice(0,7)===mk).sort((a,b)=>(b.date+(b.ts||0))>(a.date+(a.ts||0))?1:-1); }
+function monthSums(mk){ const r={in:0,out:0,fam:0,save:0,opt:0,cats:{},incs:{}}; for(const it of monthItems(mk)){ const u=itemUsd(it);
+  if(it.type==="Доход"){ r.in+=u; const c=it.cat||"Без категории"; r.incs[c]=(r.incs[c]||0)+u; } else if(it.type==="Накопления") r.save+=u;
+  else { r.out+=u; const c=it.type==="Семье"?"Семье":(it.cat||"Прочее"); r.cats[c]=(r.cats[c]||0)+u; if(it.type==="Семье") r.fam+=u; if(it.opt) r.opt+=u; } }
+  return r; }
+function upcoming(){ return vals("events").filter(e=>e.date&&daysTo(e.date)>=0).sort((a,b)=>a.date>b.date?1:-1); }
+const billPaid=(b,mk)=>vals("money").find(m=>m.billId===b.id&&String(m.date).slice(0,7)===mk);
+function campEvent(){ return vals("events").filter(e=>e.camp&&e.date&&daysTo(e.date)>=0&&daysTo(e.date)<=30).sort((a,b)=>a.date>b.date?1:-1)[0]; }
+function campStats(ev){ const end=ev.date, start=addDays(end,-30), inR=d=>d>=start&&d<=end;
+  const days=vals("days").filter(d=>inR(d.date)), w=days.filter(d=>typeof d.weight==="number").sort((a,b)=>a.date>b.date?1:-1);
+  return {tr:vals("trainings").filter(t=>inR(t.date)).length, cardio:days.filter(d=>d.cardio).length, w0:w.length?w[0].weight:null, w1:w.length?w[w.length-1].weight:null,
+    cigs:avg(days.map(d=>d.cigs).filter(v=>typeof v==="number")), sleep:avg(days.map(d=>d.sleep).filter(v=>typeof v==="number"))}; }
+function campSummary(ev){ const c=campStats(ev);
+  return `<div class="small muted">Кэмп: 30 дней до ${parseD(ev.date).toLocaleDateString("ru-RU",{day:"numeric",month:"short"})}</div><div class="stats4"><div><span>Тренировок</span><b>${c.tr}</b></div><div><span>Кардио</span><b>${c.cardio}</b></div><div><span>Сон ср.</span><b>${fmt(c.sleep)}</b></div><div><span>Сигареты</span><b>${fmt(c.cigs)}</b></div></div>${c.w0!=null?`<div class="small">Вес: ${fmt(c.w0)} → ${fmt(c.w1)} кг${ev.weight?` · цель ${fmt(ev.weight)}`:""}</div>`:""}`; }
+function lastWeight(){ const d=vals("days").filter(x=>typeof x.weight==="number").sort((a,b)=>a.date<b.date?1:-1)[0]; return d?d.weight:null; }
+function itemsOfKind(k){ return vals("items").filter(i=>kindOf(col("lists")[i.list])===k); }
+const reviewDue=d=>d.status==="Решено"&&d.decidedOn&&daysTo(addDays(d.decidedOn,90))<=0;
+function attention(){ const out=[], t=today();
+  itemsOfKind("work").filter(w=>w.followup&&w.followup<=t&&w.status!=="Закрыто").forEach(w=>out.push({id:w.id,c:"blue",text:"Follow-up: "+(w.company||w.title),sub:(w.title&&w.company?w.title+" · ":"")+(w.followup<t?"просрочено с "+parseD(w.followup).toLocaleDateString("ru-RU",{day:"numeric",month:"short"}):"сегодня")+(w.next?" · "+w.next:"")}));
+  itemsOfKind("decisions").filter(d=>d.status==="Думаю"&&d.decideBy&&d.decideBy<=t).forEach(d=>out.push({id:d.id,c:"body",text:"Пора решить: "+d.title,sub:"дедлайн был "+parseD(d.decideBy).toLocaleDateString("ru-RU",{day:"numeric",month:"short"})}));
+  itemsOfKind("decisions").filter(reviewDue).forEach(d=>out.push({id:d.id,c:"journal",text:"Проверь решение: "+d.title,sub:"прошло 90 дней — было верно?"}));
+  const mk=t.slice(0,7), dnow=+t.slice(8,10);
+  vals("bills").filter(b=>!billPaid(b,mk)&&(+b.day||1)-dnow<=2).forEach(b=>{const d=+b.day||1;out.push({bill:b.id,c:"money",text:"Оплатить: "+b.name,sub:(d<dnow?"срок был "+d+"-го":d===dnow?"сегодня":"до "+d+"-го")+" · "+fmt(b.amt,2)+" "+b.cur});});
+  itemsOfKind("goals").filter(g=>g.status==="Активна"&&g.deadline&&daysTo(g.deadline)>=0&&daysTo(g.deadline)<=7&&(+g.progress||0)<100).forEach(g=>{const n=daysTo(g.deadline);out.push({id:g.id,c:"money",text:"Срок цели: "+g.title,sub:(n===0?"сегодня":"через "+n+" "+plural(n,"день","дня","дней"))+" · прогресс "+(+g.progress||0)+"%"});});
+  return out; }
+
+function insights(){ const out=[]; const all=vals("days");
+  const both=all.filter(d=>typeof d.sleep==="number"&&typeof d.cigs==="number");
+  const low=both.filter(d=>d.sleep<6.5), ok=both.filter(d=>d.sleep>=6.5);
+  if(low.length>=3&&ok.length>=3) out.push(`В дни со сном меньше 6,5 ч ты куришь в среднем ${fmt(avg(low.map(d=>d.cigs)))}, в остальные — ${fmt(avg(ok.map(d=>d.cigs)))}.`);
+  const td=new Set(vals("trainings").map(t=>t.date)); const en=all.filter(d=>typeof d.energy==="number");
+  const te=en.filter(d=>td.has(d.date)), ne=en.filter(d=>!td.has(d.date));
+  if(te.length>=3&&ne.length>=3) out.push(`В дни тренировок энергия в среднем ${fmt(avg(te.map(d=>d.energy)))} из 5, в остальные — ${fmt(avg(ne.map(d=>d.energy)))}.`);
+  const md=all.filter(d=>typeof d.mood==="number"&&typeof d.sleep==="number"); const ms=md.filter(d=>d.sleep>=7), ml=md.filter(d=>d.sleep<7);
+  if(ms.length>=3&&ml.length>=3) out.push(`Настроение после сна 7+ ч — ${fmt(avg(ms.map(d=>d.mood)))} из 5, после короткого сна — ${fmt(avg(ml.map(d=>d.mood)))}.`);
+  const wk=weekKeys(2); const a=wAvg(wk[0],"cigs"), b=wAvg(wk[1],"cigs");
+  if(a&&b!=null&&daysIn(wk[1]).length>=3){ const ch=Math.round((b-a)/a*100); if(ch) out.push(`Сигарет на этой неделе ${ch<0?"меньше":"больше"} на ${Math.abs(ch)}%, чем на прошлой.`); }
+  if(!out.length) out.push("Подсказки появятся примерно через 2 недели записей: приложение само сравнит сон, сигареты, тренировки, энергию и настроение.");
+  return out; }
+
+/* ---------- render ---------- */
+function render(){
+  const t=today(), day=col("days")[curDay]||{}, S=settings();
+  $("#dateLabel").textContent=new Date().toLocaleDateString("ru-RU",{weekday:"long",day:"numeric",month:"long"});
+  const up=upcoming(); const ev=up[0];
+  const top3=up.slice(0,3); $("#evRow").hidden=!top3.length||tab!=="today"; $("#evRow").style.gridTemplateColumns=`repeat(${top3.length},minmax(0,1fr))`;
+  $("#evRow").innerHTML=top3.map((e,i)=>{const n=daysTo(e.date);return `<button type="button" class="evt${i===0?" first":""}" data-event="${esc(e.id)}"><span style="color:var(--fg);font-weight:600">${esc(e.title)}</span><b>${n===0?"Сегодня":n}</b><span>${n===0?"":plural(n,"день","дня","дней")+" · "}${parseD(e.date).toLocaleDateString("ru-RU",{day:"numeric",month:"short"})}</span></button>`;}).join("");
+  $("#soonCard").hidden=true;
+  $("#soonList").innerHTML=up.slice(0,4).map(e=>{const n=daysTo(e.date);return `<div class="li"><div class="grow"><b>${esc(e.title)}</b><div class="small muted">${parseD(e.date).toLocaleDateString("ru-RU",{day:"numeric",month:"long"})}</div></div><span class="pill">${n===0?"сегодня":"через "+n+" "+plural(n,"день","дня","дней")}</span></div>`;}).join("");
+  // check-in
+  const isToday=curDay===t;
+  $("#ciTitle").textContent=isToday?"Чек-ин":"Чек-ин · "+parseD(curDay).toLocaleDateString("ru-RU",{day:"numeric",month:"short"});
+  $("#dNext").disabled=isToday; $("#dNext").style.opacity=isToday?.35:1;
+  const camp=campEvent(); $("#m-weight-wrap").hidden=!camp;
+  if(camp) $("#m-weight-l").textContent="Вес, кг · кэмп к "+camp.title+(camp.weight?" · цель "+fmt(camp.weight):"");
+  $("#m-weight").textContent=fmt(day.weight); $("#m-cardio-wrap").hidden=!camp; $("#m-cardio").checked=!!day.cardio;
+  $("#m-sleep").textContent=fmt(day.sleep); $("#m-cigs").textContent=day.cigs==null?"—":day.cigs;
+  $$("[data-dots]").forEach(el=>{ const k=el.dataset.dots, v=day[k]; el.innerHTML=[1,2,3,4,5].map(i=>`<button type="button" aria-pressed="${v===i}" aria-label="${i} из 5" data-dot="${k}" data-v="${i}">${i}</button>`).join(""); });
+  $("#journalState").textContent=day.j&&Object.values(day.j).some(v=>v&&String(v).trim())?"✓ записан":"4 вопроса";
+  const wk=monday(t); $("#w-bjj").textContent=wBjj(wk); $("#w-sleep").textContent=fmt(wAvg(wk,"sleep")); $("#w-cigs").textContent=fmt(wAvg(wk,"cigs"));
+  const ms=monthSums(t.slice(0,7)); $("#w-left").textContent=(ms.in||ms.out)?usd(ms.in-ms.out):"—";
+  const fl=(S.focus||[]).filter(x=>x&&x.trim()), fg=itemsOfKind("goals").filter(g=>g.focus&&g.status!=="Готово");
+  $("#focusGoals").innerHTML=fg.map(g=>{const p=Math.max(0,Math.min(100,+g.progress||0));return `<button type="button" class="bookcard" data-item="${esc(g.id)}"><b>${esc(g.title)}</b><div class="bookrow"><div class="prog"><i style="width:${p}%"></i></div><span class="small muted">${p}%</span></div>${g.next?`<span class="small muted">Дальше: ${esc(g.next)}</span>`:""}</button>`;}).join("");
+  $("#focusList").innerHTML=fl.map(f=>`<li>${esc(f)}</li>`).join(""); $("#focusList").hidden=!fl.length||fg.length>0; $("#focusCard").hidden=!fg.length&&!fl.length;
+  const at=attention(); $("#attnCard").hidden=!at.length;
+  $("#attnList").innerHTML=at.map(a=>`<button type="button" class="attn" ${a.bill?`data-paybill="${esc(a.bill)}"`:`data-item="${esc(a.id)}"`} style="--c:var(--${a.c})"><i></i><div class="grow" style="flex:1;min-width:0"><b>${esc(a.text)}</b><br><span>${esc(a.sub)}</span></div><span class="small muted">›</span></button>`).join("");
+  // progress
+  const wks=weekKeys(8);
+  chart("#ch-cigs","#ax-cigs",wks.map(k=>wAvg(k,"cigs")),1,wks);
+  chart("#ch-sleep","#ax-sleep",wks.map(k=>wAvg(k,"sleep")),1,wks);
+  chart("#ch-bjj","#ax-bjj",wks.map(k=>wBjj(k)),0,wks);
+  $("#insights").innerHTML=insights().map(s=>`<div class="insight"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg><span>${esc(s)}</span></div>`).join("");
+  $("#revState").textContent=col("reviews")[monday(t)]?"✓ заполнен":"";
+  $("#monState").textContent=col("months")[t.slice(0,7)]?"✓ заполнен":"";
+  const wd=vals("days").filter(x=>typeof x.weight==="number").sort((a,b)=>a.date>b.date?1:-1).slice(-14);
+  $("#weightCard").hidden=!campEvent();
+  if(!$("#weightCard").hidden){ const lo=Math.min(...wd.map(x=>x.weight),camp&&camp.weight||999)-1, hi=Math.max(...wd.map(x=>x.weight),1);
+    $("#ch-weight").innerHTML=wd.map((x,i)=>`<div class="bar${i===wd.length-1?" now":""}"><small>${fmt(x.weight)}</small><i style="height:${Math.max(6,(x.weight-lo)/Math.max(.5,hi-lo)*90)}%"></i></div>`).join("")||`<div class="empty" style="flex:1">Вводи вес в чек-ине — здесь появится динамика.</div>`;
+    $("#ax-weight").innerHTML=wd.map(x=>`<span>${parseD(x.date).getDate()}</span>`).join("");
+    const cw=camp&&camp.weight, lw=wd.length?wd[wd.length-1].weight:null; $("#weightGoal").textContent=cw&&lw!=null?(lw>cw?"до цели −"+fmt(lw-cw)+" кг":"в весе ✓"):""; }
+  renderMoney(); renderBills(); renderBjj(); renderLists(); renderSettings(); syncLabel();
+}
+function chart(id,axId,v,d,wks){ const max=Math.max(...v.map(x=>x||0),1);
+  $(id).innerHTML=v.map((x,i)=>`<div class="bar${i===v.length-1?" now":""}"><small>${fmt(x,d)}</small><i style="height:${x?Math.max(6,x/max*90):4}%"></i></div>`).join("");
+  $(axId).innerHTML=wks.map(k=>{const x=parseD(k);return `<span>${x.getDate()}.${pad(x.getMonth()+1)}</span>`;}).join(""); }
+
+function renderMoney(){
+  const mk=monthSel||today().slice(0,7); const [y,m]=mk.split("-").map(Number);
+  $("#mTitle").textContent=MONTHS[m-1][0].toUpperCase()+MONTHS[m-1].slice(1)+" "+y;
+  const r=monthSums(mk); $("#mi-in").textContent=usd(r.in); $("#mi-out").textContent=usd(r.out); $("#mi-left").textContent=usd(r.in-r.out);
+  const cats=Object.entries(r.cats).sort((a,b)=>b[1]-a[1]); const top=cats.slice(0,6), rest=cats.slice(6).reduce((s,x)=>s+x[1],0); if(rest>0) top.push(["Прочее",rest]);
+  const colOf=(c,i)=>c==="Семье"?"var(--journal)":`var(${CAT_COLORS[i%CAT_COLORS.length]})`;
+  $("#mStack").innerHTML=r.out?top.map(([c,v],i)=>`<i style="width:${v/r.out*100}%;background:${colOf(c,i)}"></i>`).join(""):"";
+  $("#mLegend").innerHTML=top.map(([c,v],i)=>`<div><i style="background:${colOf(c,i)}"></i><span>${esc(c)}</span><b>${usd(v)}</b></div>`).join("")||`<div class="muted">Пока нет расходов</div>`;
+  const inc=Object.entries(r.incs).sort((a,b)=>b[1]-a[1]); $("#mIncome").textContent=inc.length?"Доходы: "+inc.map(([c,v])=>c+" "+usd(v)).join(" · "):"";
+  const ex=[]; const mv=col("months")[mk]; if(mv&&mv.savings!=null){ const pv=col("months")[prevMonth(mk)]; ex.push("Накопления: "+usd(mv.savings)+(pv&&pv.savings!=null?` (${mv.savings>=pv.savings?"+":"−"}${usd(Math.abs(mv.savings-pv.savings)).replace(/^−?/,"")})`:"")); }
+  if(r.fam) ex.push("Помощь семье: "+usd(r.fam)); if(r.save) ex.push("Отложено: "+usd(r.save)); if(r.opt) ex.push("Можно было без: "+usd(r.opt)); $("#mExtra").textContent=ex.join(" · ");
+  const items=monthItems(mk);
+  $("#mList").innerHTML=items.length?items.map(it=>`<button type="button" class="li" data-edit-money="${esc(it.id)}"><div class="grow"><div class="t">${esc(it.what||it.cat||it.type)} <span class="pill">${esc(it.type==="Расход"?(it.cat||""):it.type)}</span></div><div class="small muted">${parseD(it.date).getDate()} ${MONTHS[m-1].slice(0,3)} · ${fmt(it.amt,2)} ${esc(it.cur)}${it.cur!=="$"?" · "+usd(itemUsd(it)):""}${it.opt?" · можно было без":""}</div></div><span class="small muted">›</span></button>`).join(""):`<div class="empty">В этом месяце записей нет. Нажми «Расход» на главной.</div>`;
+}
+
+function renderBills(){ const mk=monthSel||today().slice(0,7), bs=vals("bills").sort((a,b)=>(+a.day||1)-(+b.day||1)), dnow=+today().slice(8,10), cur=mk===today().slice(0,7);
+  $("#billList").innerHTML=bs.length?bs.map(b=>{const p=billPaid(b,mk), late=cur&&!p&&(+b.day||1)<dnow;return `<div class="bill"><div class="grow"><b>${esc(b.name)}</b><div class="small muted">${fmt(b.amt,2)} ${esc(b.cur)} · до ${+b.day||1}-го${late?' · <span class="late">просрочено</span>':""}</div></div>${p?`<span class="paid">✓ ${parseD(p.date).getDate()}-го</span>`:`<button type="button" class="paybtn" data-paybill="${esc(b.id)}">Оплатить</button>`}</div>`;}).join(""):`<div class="empty">Добавь регулярные платежи в Настройках: квартира, зал, связь.</div>`;
+  const tot=bs.reduce((s,b)=>s+(b.cur==="$"?b.amt:b.amt/defRate(b.cur)),0), paid=bs.filter(b=>billPaid(b,mk)).length; if(bs.length) $("#billList").insertAdjacentHTML("beforeend",`<div class="small muted" style="padding-top:8px">Оплачено ${paid} из ${bs.length} · всего в месяц ≈ ${usd(tot)}</div>`); }
+function renderCamp(){ const ev=campEvent(); $("#campCard").hidden=!ev; if(!ev) return; const n=daysTo(ev.date), c=campStats(ev), lw=lastWeight();
+  const wk=monday(today()), cw=daysIn(wk).filter(d=>d.cardio).length;
+  $("#campCard").innerHTML=`<div class="row"><h2>Кэмп · ${esc(ev.title)}</h2><span class="pill">${n===0?"сегодня":"через "+n+" "+plural(n,"день","дня","дней")}</span></div>
+    <div class="stats4"><div><span>Вес</span><b>${fmt(lw)}</b></div><div><span>Цель</span><b>${fmt(ev.weight)}</b></div><div><span>Кардио нед.</span><b>${cw}</b></div><div><span>Трен. в кэмпе</span><b>${c.tr}</b></div></div>
+    <div class="dl"><div><span>План на турнир</span><p>${ev.plan?esc(ev.plan):"Пока пусто — распиши game plan: стойка, сверху, снизу, что делать, если проигрываешь."}</p></div></div>
+    <button type="button" class="x" data-event="${esc(ev.id)}" style="align-self:flex-start">Изменить план</button>
+    <form class="quickadd" id="campNoteForm" data-ev="${esc(ev.id)}"><label for="campNote" hidden>Мысль к турниру</label><input id="campNote" placeholder="Мысль к турниру…" autocomplete="off"><button type="submit">+</button></form>
+    ${(ev.notes||[]).length?`<div class="list">${ev.notes.slice().reverse().slice(0,5).map(x=>`<div class="li"><div class="grow"><div class="t">${esc(x.text)}</div><div class="small muted">${new Date(x.ts).toLocaleDateString("ru-RU",{day:"numeric",month:"short"})}</div></div></div>`).join("")}</div>${ev.notes.length>5?`<div class="small muted">Все ${ev.notes.length} записей — в событии</div>`:""}`:""}`; }
+function renderBjj(){ renderCamp();
+  const techs=vals("techniques").sort((a,b)=>String(a.name).localeCompare(b.name,"ru"));
+  const mark={Работает:"✓",Учу:"◐",Проблема:"!",Позже:"·"};
+  $("#bjjSeg").innerHTML=["В работе","Белый пояс","Синий пояс"].map(v=>`<button type="button" aria-pressed="${v===bjjView}" data-bjj="${v}">${v}</button>`).join("");
+  const tcard=t=>`<button type="button" class="tech" data-tech="${esc(t.id)}"><b>${esc(t.name)}</b><small>${esc(t.pos||"")}${t.cues?" · "+esc(t.cues.slice(0,80))+(t.cues.length>80?"…":""):(t.desc&&bjjView!=="В работе"?" · "+esc(t.desc.slice(0,90))+(t.desc.length>90?"…":""):"")}</small></button>`;
+  if(bjjView==="В работе"){ const act=techs.filter(t=>t.status!=="Позже"); const g={}; act.forEach(t=>{(g[t.status]=g[t.status]||[]).push(t);});
+    $("#techs").innerHTML=act.length?["Проблема","Учу","Работает"].filter(x=>g[x]).map(x=>`<div class="view" style="gap:8px"><div class="grp">${mark[x]} ${x} · ${g[x].length}</div>${g[x].map(tcard).join("")}</div>`).join(""):`<div class="empty">В работе ничего нет. Открой «Белый пояс», выбери технику и нажми «Учу».</div>`; }
+  else { const belt=bjjView.split(" ")[0]; const bt=techs.filter(t=>t.belt===belt); const done=bt.filter(t=>t.status==="Работает").length, learn=bt.filter(t=>t.status==="Учу"||t.status==="Проблема").length;
+    const g={}; bt.forEach(t=>{(g[t.pos||"Другое"]=g[t.pos||"Другое"]||[]).push(t);});
+    $("#techs").innerHTML=`<div class="view" style="gap:6px"><div class="small"><b>Освоено ${done} из ${bt.length}</b>${learn?` · учу ${learn}`:""}</div><div class="small muted">✓ работает · ◐ учу · ! проблема · нажми на технику, чтобы добавить свои подсказки и видео</div><div class="prog" style="--c:var(--body)"><i style="width:${bt.length?done/bt.length*100:0}%"></i></div></div>`+
+      POS.filter(p=>g[p]).map(p=>`<div class="view" style="gap:8px"><div class="grp">${p}</div>${g[p].map(t=>`<div class="bill"><button type="button" class="li" style="padding:0;border:0;flex:1" data-tech="${esc(t.id)}"><div class="grow"><b>${mark[t.status]||"·"} ${esc(t.name)}</b><div class="small muted">${esc(String(t.desc||"").split("\n")[0])}</div></div></button>${t.status==="Позже"?`<button type="button" class="x" data-learn="${esc(t.id)}">Учу</button>`:""}</div>`).join("")}</div>`).join(""); }
+  const tn=id=>(col("techniques")[id]||{}).name;
+  const tr=vals("trainings").sort((a,b)=>a.date<b.date?1:-1);
+  $("#trainLog").innerHTML=tr.length?tr.slice(0,40).map(t=>`<details><summary><span><b>${esc(t.topic||"Тренировка")}</b> <span class="pill">${esc(t.type||"")}</span></span><span class="small muted">${parseD(t.date).toLocaleDateString("ru-RU",{day:"numeric",month:"short"})}</span></summary><div class="dl">${[["Получилось",t.good],["Не получилось",t.bad],["В следующий раз",t.next],["Тренер сказал",t.coach]].filter(x=>x[1]).map(x=>`<div><span>${x[0]}</span><p>${esc(x[1])}</p></div>`).join("")}${(t.techs||[]).length?`<div><span>Техники</span><p>${esc(t.techs.map(tn).filter(Boolean).join(", "))}</p></div>`:""}<div><button type="button" class="x" data-edit-train="${esc(t.id)}">Изменить</button></div></div></details>`).join(""):`<div class="empty">Записей пока нет. После тренировки нажми «+ Заметка» — это 1–2 минуты.</div>`;
+}
+
+function listsSorted(){ return vals("lists").sort((a,b)=>(a.order||99)-(b.order||99)); }
+function renderLists(){
+  const ls=listsSorted(); const t=today(), yr=t.slice(0,4);
+  $("#listCards").innerHTML=ls.map(l=>{ const k=kindOf(l), its=vals("items").filter(i=>i.list===l.id); let sub;
+    if(k==="books"){ const r=its.filter(i=>i.status==="Читаю").length, y=its.filter(i=>i.status==="Прочитал"&&String(i.finished||"").startsWith(yr)).length; sub=`читаю ${r} · за ${yr}: ${y}`; }
+    else if(k==="work"){ const a=its.filter(i=>i.status!=="Закрыто").length, late=its.filter(i=>i.followup&&i.followup<=t&&i.status!=="Закрыто").length; sub=`активных ${a}${late?` · <span class="late">follow-up ${late}</span>`:""}`; }
+    else if(k==="goals"){ const a=its.filter(i=>i.status==="Активна"), f=a.filter(i=>i.focus).length; sub=`активных ${a.length}${f?` · в фокусе ${f}`:""}`; }
+    else if(k==="decisions"){ const w=its.filter(i=>i.status==="Думаю").length, rv=its.filter(reviewDue).length; sub=`ждут решения ${w}${rv?` · проверить ${rv}`:""}`; }
+    else if(k==="thoughts"){ const wk=its.filter(i=>(i.ts||0)>Date.now()-7*864e5).length; sub=`${its.length} всего · ${wk} за неделю`; }
+    else sub=`${its.length} ${plural(its.length,"запись","записи","записей")}`;
+    return `<button type="button" class="lcard" data-list="${esc(l.id)}"><i style="background:var(--${esc(l.color||"grey")})"></i><b>${esc(l.name)}</b><span>${sub}</span></button>`; }).join("");
+  const l=openList&&col("lists")[openList];
+  $("#listsHome").hidden=!!l; $("#listOne").hidden=!l;
+  if(!l) return;
+  if(tab==="lists") $("#viewTitle").textContent=l.name;
+  const k=kindOf(l), its=vals("items").filter(i=>i.list===l.id);
+  $("#listAdd").hidden=k==="thoughts";
+  const row=(i,sub,extra)=>`<button type="button" class="li" data-item="${esc(i.id)}"><div class="grow"><div class="t"><b>${esc(i.title)}</b></div>${sub?`<div class="small muted">${sub}</div>`:""}${extra||""}</div><span class="small muted">›</span></button>`;
+  const card=(inner)=>`<div class="card"><div class="list">${inner}</div></div>`;
+  const dshort=s=>parseD(s).toLocaleDateString("ru-RU",{day:"numeric",month:"short"});
+  const stars=n=>n?" · "+"★".repeat(n):"";
+  let top="", body="";
+
+  if(k==="books"){
+    const STG=["Начал","Треть","Половина","Почти всё"], PCT={"Начал":10,"Треть":33,"Половина":50,"Почти всё":85};
+    const ideasOf=b=>String(b.ideas||"").split("\n").map(x=>x.replace(/^\s*(?:[•\-–—*]|\d+[.)])\s*/,"").trim()).filter(Boolean);
+    const reading=its.filter(i=>i.status==="Читаю"), want=its.filter(i=>i.status==="Хочу"), done=its.filter(i=>i.status==="Прочитал").sort((a,b)=>String(b.finished||"")>String(a.finished||"")?1:-1), drop=its.filter(i=>i.status==="Бросил");
+    const thisYear=done.filter(i=>String(i.finished||"").startsWith(yr)).length, allIdeas=its.flatMap(b=>ideasOf(b).map(x=>({x,b})));
+    if(!["Полка","Идеи"].includes(listFilter)) listFilter="Полка";
+    top=`<div class="card"><div class="stats4"><div><span>Читаю</span><b>${reading.length}</b></div><div><span>За ${yr}</span><b>${thisYear}</b></div><div><span>Прочитано</span><b>${done.length}</b></div><div><span>Идей</span><b>${allIdeas.length}</b></div></div></div>
+      <div class="seg">${["Полка","Идеи"].map(s=>`<button type="button" aria-pressed="${s===listFilter}" data-lf="${s}">${s}</button>`).join("")}</div>`;
+    if(listFilter==="Идеи"){
+      const byBook=[...done,...reading,...drop].filter(b=>ideasOf(b).length);
+      body=byBook.length?byBook.map(b=>`<div class="card"><button type="button" class="li" style="padding:0" data-item="${esc(b.id)}"><div class="grow"><b>${esc(b.title)}</b><div class="small muted">${esc(b.author||"")}${stars(b.rating)}</div></div><span class="small muted">›</span></button><ul class="focus-list">${ideasOf(b).map(x=>`<li>${esc(x)}</li>`).join("")}</ul>${b.apply?`<div class="insight" style="background:var(--money-bg)"><span><b>Применю:</b> ${esc(b.apply)}</span></div>`:""}</div>`).join(""):`<div class="empty">Идей пока нет. Открой книгу и запиши главные идеи — каждую с новой строки. Здесь они соберутся со всех книг.</div>`;
+    } else {
+      body+=`<div class="grp">Читаю сейчас</div>`+(reading.length?reading.map(b=>{const st=b.stage||"Начал", p=PCT[st]||10, n=ideasOf(b).length;return `<div class="bookcard"><button type="button" class="li" style="padding:0" data-item="${esc(b.id)}"><div class="grow"><b>${esc(b.title)}</b><div class="small muted">${esc(b.author||"")}${n?` · ${n} ${plural(n,"идея","идеи","идей")}`:""}</div></div><span class="small muted">›</span></button><div class="prog" style="--c:var(--sand)"><i style="width:${p}%"></i></div><div class="summary">${[...STG,"Прочитал"].map(s=>`<button type="button" aria-pressed="${s===st}" data-stage="${esc(b.id)}|${s}">${s}</button>`).join("")}</div></div>`;}).join(""):`<div class="empty">Сейчас ничего не читаешь. Открой книгу из «Хочу» и поставь статус «Читаю».</div>`);
+      if(want.length) body+=`<div class="grp">Хочу прочитать · ${want.length}</div>`+card(want.map(b=>row(b,esc(b.author||""))).join(""));
+      const years={}; done.forEach(b=>{const y=String(b.finished||"").slice(0,4)||"Без даты";(years[y]=years[y]||[]).push(b);});
+      Object.keys(years).sort().reverse().forEach(y=>{ body+=`<div class="grp">Прочитано · ${esc(y)} · ${years[y].length} ${plural(years[y].length,"книга","книги","книг")}</div>`+card(years[y].map(b=>{const n=ideasOf(b).length;return row(b,esc(b.author||"")+stars(b.rating)+(n?` · ${n} ${plural(n,"идея","идеи","идей")}`:""));}).join("")); });
+      if(drop.length) body+=`<div class="grp">Бросил</div>`+card(drop.map(b=>row(b,esc(b.author||""))).join(""));
+    }
+  }
+  else if(k==="work"){
+    const sts=statusesOf(l); if(!["Все",...sts].includes(listFilter)) listFilter="Все";
+    top=`<div class="summary">${["Все",...sts].map(s=>`<button type="button" aria-pressed="${s===listFilter}" data-lf="${esc(s)}">${esc(s)}<b>${s==="Все"?its.filter(i=>i.status!=="Закрыто").length:its.filter(i=>i.status===s).length}</b></button>`).join("")}</div>`;
+    const show=its.filter(i=>listFilter==="Все"?i.status!=="Закрыто":i.status===listFilter).sort((a,b)=>(a.followup||"9999")>(b.followup||"9999")?1:-1);
+    body=show.length?card(show.map(w=>{const late=w.followup&&w.followup<=t&&w.status!=="Закрыто";return row(w,`${esc(w.company||"")}${w.company?" · ":""}${esc(w.status)}${w.followup?` · <span class="${late?"late":""}">follow-up ${dshort(w.followup)}</span>`:""}${w.next?"<br>Дальше: "+esc(w.next):""}`);}).join("")):`<div class="empty">Здесь пусто. Нашёл вакансию или интересную компанию — добавь её.</div>`;
+  }
+  else if(k==="goals"){
+    const H=["Месяц","Квартал","Год","5 лет"], act=its.filter(i=>i.status==="Активна");
+    H.forEach(h=>{ const g=act.filter(i=>(i.horizon||"Год")===h); if(!g.length) return;
+      body+=`<div class="grp">${h}</div>`+g.map(x=>{const p=Math.max(0,Math.min(100,+x.progress||0));return `<button type="button" class="bookcard" data-item="${esc(x.id)}"><div class="row"><b>${esc(x.title)}</b>${x.focus?`<span class="pill">в фокусе</span>`:""}</div><div class="bookrow"><div class="prog"><i style="width:${p}%"></i></div><span class="small muted">${p}%</span></div>${x.next||x.deadline?`<span class="small muted">${x.next?"Дальше: "+esc(x.next):""}${x.next&&x.deadline?" · ":""}${x.deadline?"срок "+dshort(x.deadline):""}</span>`:""}</button>`;}).join(""); });
+    if(!act.length) body=`<div class="empty">Целей пока нет. Добавь 1–3 главные цели и отметь «в фокусе» — они появятся на главном экране.</div>`;
+    const rest=its.filter(i=>i.status!=="Активна"); if(rest.length) body+=`<div class="grp">Пауза и готово</div>`+card(rest.map(x=>row(x,esc(x.status))).join(""));
+  }
+  else if(k==="decisions"){
+    const wait=its.filter(i=>i.status==="Думаю").sort((a,b)=>(a.decideBy||"9999")>(b.decideBy||"9999")?1:-1), rv=its.filter(reviewDue), dec=its.filter(i=>i.status==="Решено"&&!reviewDue(i)), chk=its.filter(i=>i.status==="Проверено");
+    top=`<div class="small muted">Только для решений, которые влияют на жизнь дольше месяца. Всегда ставь дедлайн — это защита от бесконечного анализа.</div>`;
+    if(rv.length) body+=`<div class="grp">Пора проверить</div>`+card(rv.map(d=>row(d,"решено "+dshort(d.decidedOn)+" · было верно?")).join(""));
+    body+=`<div class="grp">Ждут решения</div>`+(wait.length?card(wait.map(d=>{const late=d.decideBy&&d.decideBy<=t;return row(d,d.decideBy?`<span class="${late?"late":""}">решить до ${dshort(d.decideBy)}</span>`:"без дедлайна");}).join("")):`<div class="empty">Нерешённых вопросов нет.</div>`);
+    if(dec.length) body+=`<div class="grp">Решено</div>`+card(dec.map(d=>row(d,(d.decidedOn?dshort(d.decidedOn):"")+(d.confidence?" · уверенность: "+esc(d.confidence).toLowerCase():""))).join(""));
+    if(chk.length) body+=`<div class="grp">Проверено</div>`+card(chk.map(d=>row(d,esc(d.verdict&&d.verdict!=="—"?d.verdict:"проверено"))).join(""));
+  }
+  else if(k==="thoughts"){
+    const sts=statusesOf(l); if(!["Все",...sts].includes(listFilter)) listFilter="Все";
+    top=`<form class="quickadd" id="qaForm"><label for="qa" class="small muted" hidden>Новая мысль</label><input id="qa" placeholder="Записать мысль…" autocomplete="off"><button type="submit">+</button></form>
+      <div class="field"><label for="qaSearch" hidden>Поиск</label><input id="qaSearch" type="search" placeholder="Поиск" value="${esc(listSearch)}" autocomplete="off"></div>
+      <div class="summary">${["Все",...sts].map(s=>`<button type="button" aria-pressed="${s===listFilter}" data-lf="${esc(s)}">${esc(s)}</button>`).join("")}</div>`;
+    const q=listSearch.toLowerCase();
+    const show=its.filter(i=>(listFilter==="Все"||i.status===listFilter)&&(!q||(i.title+" "+(i.note||"")).toLowerCase().includes(q))).sort((a,b)=>(b.ts||0)-(a.ts||0));
+    body=show.length?card(show.map(i=>row(i,new Date(i.ts||Date.now()).toLocaleDateString("ru-RU",{day:"numeric",month:"short"})+(i.status&&i.status!=="Мысль"?" · "+esc(i.status):""))).join("")):`<div class="empty">${q?"Ничего не нашлось.":"Пока пусто. Пиши сюда всё, что крутится в голове — разбирать не нужно."}</div>`;
+  }
+  else {
+    const sts=statusesOf(l); if(!["Все",...sts].includes(listFilter)) listFilter="Все";
+    top=`<div class="summary">${["Все",...sts].map(s=>`<button type="button" aria-pressed="${s===listFilter}" data-lf="${esc(s)}">${esc(s)}<b>${s==="Все"?its.length:its.filter(i=>i.status===s).length}</b></button>`).join("")}</div>`;
+    const show=its.filter(i=>listFilter==="Все"||i.status===listFilter).sort((a,b)=>sts.indexOf(a.status)-sts.indexOf(b.status)||(b.ts||0)-(a.ts||0));
+    body=show.length?card(show.map(i=>row(i,esc(i.status||"")+stars(i.rating)+(i.date?" · "+esc((l.dateLabel||"").toLowerCase())+" "+dshort(i.date):""))).join("")):`<div class="empty">Пусто. Нажми «+ Добавить».</div>`;
+  }
+  const hadFocus=document.activeElement&&document.activeElement.id==="qaSearch";
+  $("#listTop").innerHTML=top; $("#listTop").hidden=!top; $("#listBody").innerHTML=body;
+  if(hadFocus){ const s=$("#qaSearch"); s.focus(); s.setSelectionRange(s.value.length,s.value.length); }
+}
+
+function renderSettings(){
+  const S=settings(), ae=document.activeElement;
+  const evRow=e=>`<button type="button" class="li" data-event="${esc(e.id)}"><div class="grow"><b>${esc(e.title)}</b>${e.camp?' <span class="pill">соревнование</span>':""}<div class="small muted">${parseD(e.date).toLocaleDateString("ru-RU",{day:"numeric",month:"long",year:"numeric"})}${daysTo(e.date)<0?(e.result?" · есть итог":" · запиши итог"):""}</div></div><span class="small muted">›</span></button>`;
+  const allEv=vals("events"), fut=allEv.filter(e=>daysTo(e.date)>=0).sort((a,b)=>a.date>b.date?1:-1), past=allEv.filter(e=>daysTo(e.date)<0).sort((a,b)=>a.date<b.date?1:-1);
+  $("#evList").innerHTML=(fut.map(evRow).join("")||`<div class="empty">Предстоящих событий нет.</div>`)+(past.length?`<div class="grp">Архив · ${past.length}</div>`+past.map(evRow).join(""):"");
+  $$("[data-focus]").forEach(i=>{ if(i!==ae) i.value=(S.focus||[])[+i.dataset.focus]||""; });
+  if($("#rTRY")!==ae) $("#rTRY").value=S.rateTRY; if($("#rKGS")!==ae) $("#rKGS").value=S.rateKGS;
+  const chips=(key)=>(S[key]||[]).map(c=>`<span class="catchip"><button type="button" style="width:auto;padding:0 4px;color:inherit;font-size:14px" data-catedit="${key}|${esc(c)}">${esc(c)}</button><button type="button" aria-label="Удалить ${esc(c)}" data-catdel="${key}|${esc(c)}">×</button></span>`).join("");
+  $("#catExp").innerHTML=chips("cats"); $("#catInc").innerHTML=chips("incCats");
+  $("#billSet").innerHTML=vals("bills").sort((a,b)=>(+a.day||1)-(+b.day||1)).map(b=>`<button type="button" class="li" data-bill="${esc(b.id)}"><div class="grow"><b>${esc(b.name)}</b><div class="small muted">${fmt(b.amt,2)} ${esc(b.cur)} · до ${+b.day||1}-го · ${esc(b.cat||"")}</div></div><span class="small muted">›</span></button>`).join("")||`<div class="empty">Платежей пока нет.</div>`;
+  if($("#cfgUrl")!==ae) $("#cfgUrl").value=cfg.url; if($("#cfgTok")!==ae) $("#cfgTok").value=cfg.token;
+  $("#cfgInfo").textContent=cfg.url?(store.lastSync?"Последняя синхронизация: "+new Date(store.lastSync).toLocaleString("ru-RU"):"Ещё не синхронизировалось"):"Не подключено";
+}
+
+/* ---------- check-in ---------- */
+let dayTimer=null, pendingDay=null;
+function saveDay(patch){ const k=curDay; if(dayTimer&&pendingDay&&pendingDay!==k) commitDay(); pendingDay=k; const cur=col("days")[k]||{}; col("days")[k]={...cur,...patch,date:k,id:k}; render();
+  clearTimeout(dayTimer); dayTimer=setTimeout(()=>{ dayTimer=null; put("days",k,{...col("days")[k]},true); },600); }
+document.addEventListener("click",e=>{
+  const st=e.target.closest("[data-step]"); if(st){ const k=st.dataset.step, d=+st.dataset.d, cur=(col("days")[curDay]||{})[k];
+    if(k==="weight"){ const v=cur==null?(lastWeight()||(campEvent()||{}).weight||75):cur+d; saveDay({weight:Math.round(v*10)/10}); return; }
+    const v=cur==null?(k==="sleep"?7:(d>0?1:0)):cur+d; saveDay({[k]:Math.max(0,Math.round(v*2)/2)}); return; }
+  const dot=e.target.closest("[data-dot]"); if(dot){ const k=dot.dataset.dot, v=+dot.dataset.v, cur=(col("days")[curDay]||{})[k]; saveDay({[k]:cur===v?null:v}); }
+});
+$("#m-cardio").addEventListener("change",e=>saveDay({cardio:e.target.checked}));
+$("#dPrev").onclick=()=>{ curDay=addDays(curDay,-1); render(); };
+$("#dNext").onclick=()=>{ if(curDay<today()){ curDay=addDays(curDay,1); render(); } };
+
+/* ---------- sheets ---------- */
+let openSheet=null;
+function show(id){ closeSheet(); openSheet=$("#s-"+id); $("#scrim").hidden=false; openSheet.hidden=false; openSheet.scrollTop=0; }
+function closeSheet(){ if(openSheet) openSheet.hidden=true; openSheet=null; $("#scrim").hidden=true; }
+$("#scrim").addEventListener("click",closeSheet);
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&openSheet) closeSheet(); });
+document.addEventListener("click",e=>{ if(e.target.closest("[data-close]")) closeSheet(); const o=e.target.closest("[data-open]"); if(o) OPEN[o.dataset.open](); });
+function seg(el,opts,val,onPick){ el.innerHTML=opts.map(o=>`<button type="button" aria-pressed="${o===val}" data-v="${esc(o)}">${esc(o)}</button>`).join("");
+  el.onclick=e=>{const b=e.target.closest("button"); if(!b)return; el.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b)); onPick&&onPick(b.dataset.v);}; }
+const segVal=el=>{const b=el.querySelector('[aria-pressed="true"]');return b?b.dataset.v:null;};
+function armed(b,fn){ if(b.dataset.armed==="1"){ b.dataset.armed=""; fn(); return; } b.dataset.armed="1"; const old=b.textContent; b.textContent="Точно удалить?"; setTimeout(()=>{ if(b.dataset.armed==="1"){b.dataset.armed="";b.textContent=old;} },3000); }
+function resetDel(b,show){ b.hidden=!show; b.dataset.armed=""; }
+
+/* expense */
+const E={id:null,type:"Расход",cur:"₺",cat:null};
+function defRate(cur){ const S=settings(); return cur==="₺"?S.rateTRY:cur==="сом"?S.rateKGS:1; }
+function expPreview(){ const a=num($("#e-amt").value)||0, r=num($("#e-rate").value)||defRate(E.cur), u=E.cur==="$"?a:a/r; $("#e-usd").textContent=E.cur==="$"?"":"≈ $"+(u<100?u.toFixed(2):Math.round(u).toLocaleString("ru-RU")); }
+function catList(){ const S=settings(); return E.type==="Доход"?(S.incCats||[]):(S.cats||[]); }
+function renderCats(){ const cats=catList(); $("#e-cat-l").textContent=E.type==="Доход"?"Источник дохода":"Категория";
+  $("#e-cat").innerHTML=cats.map(c=>`<button type="button" class="chip" aria-pressed="${c===E.cat}" data-v="${esc(c)}">${esc(c)}</button>`).join("")+`<button type="button" class="chip" data-newcat="1" aria-label="Добавить категорию">+ своя</button>`; $("#e-newcat-row").hidden=true; }
+function expUI(keepRate){ const spend=E.type==="Расход"; $("#e-cat-wrap").hidden=!(spend||E.type==="Доход"); if(!catList().includes(E.cat)) E.cat=null; renderCats(); $("#e-opt-wrap").hidden=!(spend||E.type==="Семье");
+  $("#e-rate-wrap").hidden=E.cur==="$"; $("#e-rate-l").textContent=(E.cur==="₺"?"₺":"сом")+" за $1"; if(!keepRate) $("#e-rate").value=defRate(E.cur); expPreview(); }
+const OPEN={
+  expense(id,bill){ const it=id?col("money")[id]:null; E.id=it?it.id:null; E.billId=it?it.billId||null:(bill?bill.id:null); E.type=it?it.type:"Расход"; E.cur=it?it.cur:"₺"; E.cat=it?it.cat:null;
+    $("#f-expense").reset(); $("#se-t").textContent=it?"Изменить запись":"Новая запись";
+    $("#e-amt").value=it?it.amt:""; $("#e-what").value=it?it.what||"":""; $("#e-opt").checked=!!(it&&it.opt); $("#e-date").value=it?it.date:today();
+    seg($("#e-type"),TYPES,E.type,v=>{E.type=v;expUI(true);}); seg($("#e-cur"),CURS,E.cur,v=>{E.cur=v;expUI();});
+    $("#e-cat").onclick=e=>{const b=e.target.closest("button");if(!b)return; if(b.dataset.newcat){ $("#e-newcat-row").hidden=false; $("#e-newcat").value=""; $("#e-newcat").focus(); return; } $$("#e-cat button").forEach(x=>x.setAttribute("aria-pressed",x===b));E.cat=b.dataset.v;};
+    if(bill&&!it){ E.type="Расход"; E.cur=bill.cur; E.cat=bill.cat||null; seg($("#e-type"),TYPES,E.type,v=>{E.type=v;expUI(true);}); seg($("#e-cur"),CURS,E.cur,v=>{E.cur=v;expUI();}); $("#e-amt").value=bill.amt; $("#e-what").value=bill.name; $("#se-t").textContent="Оплата: "+bill.name; }
+    expUI(); if(it&&it.cur!=="$") $("#e-rate").value=it.rate; expPreview(); resetDel($("#e-del"),!!it); show("expense"); if(!it) setTimeout(()=>$("#e-amt").focus(),80); },
+  train(id){ const t=id?col("trainings")[id]:null; $("#f-train").reset(); $("#f-train").dataset.id=t?t.id:""; $("#st-t").textContent=t?"Изменить тренировку":"После тренировки";
+    $("#t-date").value=t?t.date:today(); seg($("#t-type"),TTYPES,t?t.type:"Gi");
+    ["topic","good","bad","next","coach"].forEach(k=>$("#t-"+k).value=t?t[k]||"":"");
+    const sel=new Set(t?t.techs||[]:[]);
+    $("#t-techs").innerHTML=vals("techniques").sort((a,b)=>String(a.name).localeCompare(b.name,"ru")).map(x=>`<button type="button" class="chip" aria-pressed="${sel.has(x.id)}" data-v="${esc(x.id)}">${esc(x.name)}</button>`).join("")||`<span class="small muted">Техники добавляются во вкладке BJJ</span>`;
+    $("#t-techs").onclick=e=>{const b=e.target.closest("button");if(b)b.setAttribute("aria-pressed",b.getAttribute("aria-pressed")!=="true");};
+    resetDel($("#t-del"),!!t); show("train"); },
+  journal(){ const j=(col("days")[curDay]||{}).j||{}; $("#sj-t").textContent=curDay===today()?"Дневник":"Дневник · "+parseD(curDay).toLocaleDateString("ru-RU",{day:"numeric",month:"short"});
+    $("#j-main").value=j.main||"";$("#j-worry").value=j.worry||"";$("#j-learn").value=j.learn||"";$("#j-tom").value=j.tom||"";$("#j-free").value=j.free||""; show("journal"); },
+  thought(){ OPEN.item(null,"thoughts"); },
+  item(id,listId){ const it=id?col("items")[id]:null; let lid=it?it.list:(listId||openList); if(!col("lists")[lid]) lid=(listsSorted()[0]||{}).id;
+    if(!lid){ toast("Сначала создай раздел"); return; } const f=$("#f-item"); f.dataset.id=it?it.id:"";
+    $("#i-list").innerHTML=listsSorted().map(l=>`<option value="${esc(l.id)}"${l.id===lid?" selected":""}>${esc(l.name)}</option>`).join("");
+    $("#i-list-wrap").hidden=!!it||!!listId;
+    $("#i-title").value=it?it.title||"":""; $("#i-note").value=it?it.note||"":""; $("#i-date").value=it?it.date||"":""; $("#i-link").value=it?it.link||"":"";
+    const ok=it&&/^https?:\/\//i.test(it.link||""); $("#i-open").hidden=!ok; if(ok) $("#i-open").href=it.link;
+    const fill=lidNow=>{ const l=col("lists")[lidNow]||{}, K=KINDS[kindOf(l)];
+      $("#si-t").textContent=it?"Изменить":(l.name||"Запись"); $("#i-title-l").textContent=K?K.titleL:"Название";
+      const sts=statusesOf(l); seg($("#i-status"),sts,it&&sts.includes(it.status)?it.status:sts[0]);
+      const hasR=K?!!K.rating:!!l.rating, rv=it?it.rating||0:0; $("#i-rating-wrap").hidden=!hasR;
+      $("#i-rating").innerHTML=[1,2,3,4,5].map(n=>`<button type="button" aria-label="${n} из 5" aria-pressed="${n<=rv}" data-v="${n}">★</button>`).join(""); $("#i-rating").dataset.v=rv;
+      $("#i-date-wrap").hidden=!!K||!l.dateLabel; $("#i-date-l").textContent=l.dateLabel||"Дата";
+      const bare=!!(K&&K.noNote); $("#i-note-wrap").hidden=bare&&!(it&&it.note); $("#i-link-wrap").hidden=bare&&!(it&&it.link);
+      $("#i-extra").innerHTML=(K?K.fields:[]).map(fd=>fieldHtml(fd,it?it[fd[0]]:undefined)).join(""); $("#i-extra").hidden=!(K&&K.fields.length);
+      if(!it) $("#i-note").value=l.template||""; };
+    fill(lid); $("#i-list").onchange=()=>fill($("#i-list").value);
+    resetDel($("#i-del"),!!it); show("item"); if(!it) setTimeout(()=>$("#i-title").focus(),80); },
+  listcfg(id){ const l=id?col("lists")[id]:null; const f=$("#f-listcfg"); f.dataset.id=l?l.id:""; const k=l?kindOf(l):"generic";
+    $("#l-generic").hidden=k!=="generic"; $("#l-template-wrap").hidden=k==="thoughts";
+    $("#sl-t").textContent=l?"Настроить раздел":"Новый раздел"; $("#l-name").value=l?l.name:""; $("#l-statuses").value=l?(l.statuses||[]).join(", "):"Хочу, В процессе, Готово";
+    $("#l-rating").checked=!!(l&&l.rating); $("#l-datelabel").value=l?l.dateLabel||"":""; $("#l-template").value=l?l.template||"":"";
+    const c=l?l.color:"idea"; $("#l-color").innerHTML=COLORS.map(x=>`<button type="button" class="chip" aria-pressed="${x===c}" aria-label="${x}" data-v="${x}" style="width:44px;padding:0;background:var(--${x});border-color:var(--${x})"></button>`).join("");
+    $("#l-color").onclick=e=>{const b=e.target.closest("button");if(!b)return;$$("#l-color button").forEach(x=>x.setAttribute("aria-pressed",x===b));};
+    resetDel($("#l-del"),!!l); show("listcfg"); },
+  bill(id){ const b=id?col("bills")[id]:null; $("#f-bill").dataset.id=b?b.id:""; $("#b-name").value=b?b.name:""; $("#b-amt").value=b?b.amt:""; $("#b-day").value=b?b.day:"";
+    seg($("#b-cur"),CURS,b?b.cur:"₺"); const cats=settings().cats||[]; $("#b-cat").innerHTML=cats.map(c=>`<option${b&&b.cat===c?" selected":""}>${esc(c)}</option>`).join(""); resetDel($("#b-del"),!!b); show("bill"); },
+  month(){ const mk=today().slice(0,7), m=col("months")[mk]||{}, r=monthSums(mk), days=vals("days").filter(d=>String(d.date).slice(0,7)===mk);
+    const a=f=>avg(days.map(d=>d[f]).filter(v=>typeof v==="number")), tr=vals("trainings").filter(x=>String(x.date).slice(0,7)===mk).length;
+    const books=itemsOfKind("books").filter(b=>b.status==="Прочитал"&&String(b.finished||"").slice(0,7)===mk).length;
+    $("#sm-t").textContent="Обзор · "+MONTHS[+mk.slice(5)-1];
+    $("#mo-auto1").innerHTML=`<div><span>Доход</span><b>${usd(r.in)}</b></div><div><span>Расход</span><b>${usd(r.out)}</b></div><div><span>Остаток</span><b>${usd(r.in-r.out)}</b></div><div><span>Семье</span><b>${usd(r.fam)}</b></div>`;
+    $("#mo-auto2").innerHTML=`<div><span>Сон ср.</span><b>${fmt(a("sleep"))}</b></div><div><span>Сигареты</span><b>${fmt(a("cigs"))}</b></div><div><span>BJJ</span><b>${tr}</b></div><div><span>Книг</span><b>${books}</b></div>`;
+    const pv=col("months")[prevMonth(mk)]; $("#mo-savHint").textContent=pv&&pv.savings!=null?"В прошлом месяце: "+usd(pv.savings):""+(r.opt?"":"");
+    $("#mo-sav").value=m.savings??""; $("#mo-change").value=m.change||""; $("#mo-lesson").value=m.lesson||"";
+    const f=m.focus||settings().focus||[]; $("#mo-f1").value=f[0]||""; $("#mo-f2").value=f[1]||""; $("#mo-f3").value=f[2]||""; show("month"); },
+  cat(key,name){ $("#f-cat").dataset.key=key; $("#f-cat").dataset.name=name; $("#c-name").value=name; $("#sc-t").textContent=key==="cats"?"Категория расходов":"Категория доходов";
+    const n=vals("money").filter(m=>m.cat===name).length; $("#c-info").textContent=n?`Записей с этой категорией: ${n}. При переименовании они обновятся.`:"Записей с этой категорией пока нет.";
+    resetDel($("#c-del"),true); show("cat"); },
+  event(id){ const ev=id?col("events")[id]:null; $("#f-event").dataset.id=ev?ev.id:""; $("#ev-title").value=ev?ev.title:""; $("#ev-date").value=ev?ev.date:""; $("#ev-camp").checked=!!(ev&&ev.camp); $("#ev-weight").value=ev&&ev.weight?ev.weight:""; $("#ev-plan").value=ev&&ev.plan||""; $("#ev-result").value=ev&&ev.result||"";
+    const notes=ev&&(ev.notes||[]).length?`<div class="small muted">Мысли к событию · ${ev.notes.length}</div><div class="list">${ev.notes.map(x=>`<div class="li"><div class="grow"><div class="t">${esc(x.text)}</div><div class="small muted">${new Date(x.ts).toLocaleDateString("ru-RU",{day:"numeric",month:"short"})}</div></div></div>`).join("")}</div>`:"";
+    const sum=(ev&&ev.camp?campSummary(ev):"")+notes; $("#ev-sum").hidden=!sum; $("#ev-sum").innerHTML=sum; resetDel($("#ev-del"),!!ev); show("event"); },
+  tech(id){ const t=id?col("techniques")[id]:{}; $("#f-tech").dataset.id=t&&t.id||""; $("#k-name").value=t.name||""; $("#k-cues").value=t.cues||""; $("#k-video").value=t.video||"";
+    $("#k-pos").innerHTML=POS.map(p=>`<option${p===t.pos?" selected":""}>${p}</option>`).join(""); seg($("#k-status"),TSTATUS,t.status||"Учу");
+    $("#k-belt").value=t.belt||""; $("#k-desc").value=t.desc||"";
+    const ok=/^https?:\/\//i.test(t.video||""); $("#k-open").hidden=!ok; if(ok) $("#k-open").href=t.video;
+    resetDel($("#k-del"),!!t.id); show("tech"); },
+  review(){ const wk=monday(today()), r=col("reviews")[wk]||{}; const ms=monthSums(today().slice(0,7));
+    $("#r-auto").innerHTML=`<div><span>BJJ</span><b>${wBjj(wk)}</b></div><div><span>Сон ср.</span><b>${fmt(wAvg(wk,"sleep"))}</b></div><div><span>Сигареты</span><b>${fmt(wAvg(wk,"cigs"))}</b></div><div><span>Остаток мес.</span><b>${(ms.in||ms.out)?usd(ms.in-ms.out):"—"}</b></div>`;
+    $("#r-rates").innerHTML=LEVERS.map(([k,l])=>`<div class="row"><span style="min-width:64px">${l}</span><div class="rate-row" data-rate="${k}" style="flex:1">${[1,2,3,4,5].map(i=>`<button type="button" aria-label="${l}: ${i}" aria-pressed="${r[k]===i}" data-v="${i}">${i}</button>`).join("")}</div></div>`).join("");
+    $$("#r-rates .rate-row").forEach(rw=>rw.onclick=e=>{const b=e.target.closest("button");if(!b)return;rw.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));});
+    $("#r-screen").value=r.screen??"";$("#r-weight").value=r.weight??"";$("#r-win").value=r.win||"";$("#r-work").value=r.work||"";$("#r-stop").value=r.stop||"";$("#r-focus").value=r.focus||"";
+    show("review"); }
+};
+$("#i-rating").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;let v=+b.dataset.v; if(+$("#i-rating").dataset.v===v) v=0; $("#i-rating").dataset.v=v; $$("#i-rating button").forEach(x=>x.setAttribute("aria-pressed",+x.dataset.v<=v));});
+function addCat(){ const v=$("#e-newcat").value.trim(); if(!v) return; const key=E.type==="Доход"?"incCats":"cats"; const list=[...(settings()[key]||[])];
+  if(!list.includes(v)) list.push(v); saveSettings({[key]:list}); E.cat=v; renderCats(); toast("Категория «"+v+"» добавлена"); }
+$("#e-newcat-add").onclick=addCat; $("#e-newcat").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); addCat(); } });
+$("#e-amt").addEventListener("input",expPreview); $("#e-rate").addEventListener("input",expPreview);
+
+/* ---------- submit handlers ---------- */
+$("#f-expense").addEventListener("submit",e=>{ e.preventDefault(); const amt=num($("#e-amt").value); if(!amt){toast("Введи сумму");$("#e-amt").focus();return;}
+  if(E.type==="Расход"&&!E.cat){toast("Выбери категорию");return;}
+  const id=E.id||uid(), old=col("money")[id]||{};
+  put("money",id,{billId:E.billId||old.billId||"",ts:old.ts||Date.now(),date:$("#e-date").value||today(),amt,cur:E.cur,rate:E.cur==="$"?1:(num($("#e-rate").value)||defRate(E.cur)),type:E.type,cat:(E.type==="Расход"||E.type==="Доход")?(E.cat||""):"",what:$("#e-what").value.trim(),opt:$("#e-opt").checked&&!$("#e-opt-wrap").hidden});
+  closeSheet(); toast(`Сохранено: ${fmt(amt,2)} ${E.cur} · ${E.type==="Расход"?E.cat:E.type}`); });
+$("#e-del").addEventListener("click",e=>armed(e.currentTarget,()=>{ del("money",E.id); closeSheet(); toast("Удалено"); }));
+$("#f-train").addEventListener("submit",e=>{ e.preventDefault(); const id=$("#f-train").dataset.id||uid();
+  put("trainings",id,{date:$("#t-date").value||today(),type:segVal($("#t-type")),topic:$("#t-topic").value.trim(),good:$("#t-good").value.trim(),bad:$("#t-bad").value.trim(),next:$("#t-next").value.trim(),coach:$("#t-coach").value.trim(),techs:$$('#t-techs button[aria-pressed="true"]').map(b=>b.dataset.v)});
+  closeSheet(); toast("Тренировка записана"); });
+$("#t-del").addEventListener("click",e=>armed(e.currentTarget,()=>{ del("trainings",$("#f-train").dataset.id); closeSheet(); toast("Удалено"); }));
+$("#f-journal").addEventListener("submit",e=>{ e.preventDefault(); const k=curDay; clearTimeout(dayTimer);
+  put("days",k,{...(col("days")[k]||{}),date:k,j:{main:$("#j-main").value,worry:$("#j-worry").value,learn:$("#j-learn").value,tom:$("#j-tom").value,free:$("#j-free").value}}); closeSheet(); toast("Дневник сохранён"); });
+function fieldHtml([k,t,label,opts],v){ const id="x-"+k;
+  if(t==="seg") return `<div class="field"><label>${esc(label)}</label><div class="seg" data-f="${k}" data-t="seg">${opts.map(o=>`<button type="button" aria-pressed="${o===v}" data-v="${esc(o)}">${esc(o)}</button>`).join("")}</div></div>`;
+  if(t==="range"){ const n=+v||0; return `<div class="field"><label for="${id}">${esc(label)}: <b id="${id}-v">${n}%</b></label><div class="range"><input type="range" min="0" max="100" step="5" id="${id}" data-f="${k}" data-t="num" value="${n}"></div></div>`; }
+  if(t==="bool") return `<div class="toggle"><label for="${id}">${esc(label)}</label><input type="checkbox" id="${id}" data-f="${k}" data-t="bool"${v?" checked":""}></div>`;
+  if(t==="area") return `<div class="field"><label for="${id}">${esc(label)}</label><textarea id="${id}" rows="3" data-f="${k}" data-t="text">${esc(v||"")}</textarea></div>`;
+  const type=t==="date"?"date":"text", im=t==="num"?' inputmode="numeric"':"";
+  return `<div class="field"><label for="${id}">${esc(label)}</label><input id="${id}" type="${type}"${im} data-f="${k}" data-t="${t==="num"?"num":"text"}" value="${esc(v??"")}" autocomplete="off"></div>`; }
+$("#i-extra").addEventListener("click",e=>{ const b=e.target.closest('[data-t="seg"] button'); if(!b) return; const g=b.parentElement; const on=b.getAttribute("aria-pressed")!=="true"; g.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b&&on)); });
+$("#i-extra").addEventListener("input",e=>{ if(e.target.type==="range"){ const l=$("#"+e.target.id+"-v"); if(l) l.textContent=e.target.value+"%"; } });
+$("#f-item").addEventListener("submit",e=>{ e.preventDefault(); const title=$("#i-title").value.trim(); if(!title){toast("Напиши название");$("#i-title").focus();return;}
+  const id=$("#f-item").dataset.id||uid(), old=col("items")[id]||{}, lid=$("#i-list").value; const l=col("lists")[lid]||{}, k=kindOf(l), K=KINDS[k];
+  const x={}; $$("#i-extra [data-f]").forEach(el=>{ const t=el.dataset.t, f=el.dataset.f; if(t==="seg"){const b=el.querySelector('[aria-pressed="true"]'); x[f]=b?b.dataset.v:"";} else if(t==="bool") x[f]=el.checked; else if(t==="num") x[f]=num(el.value); else x[f]=el.value.trim(); });
+  const status=segVal($("#i-status"))||statusesOf(l)[0]||"", note=$("#i-note").value;
+  const doc={...old,ts:old.ts||Date.now(),list:lid,title,status,rating:(K?K.rating:l.rating)?+$("#i-rating").dataset.v||0:0,date:!K&&l.dateLabel?$("#i-date").value:"",note:note===l.template&&!old.id?"":note,link:$("#i-link").value.trim(),...x};
+  delete doc.id; delete doc.updated;
+  if(k==="books"){ if(status==="Читаю"&&!doc.started) doc.started=today(); if(status==="Читаю"&&!doc.stage) doc.stage="Начал"; if(status==="Прочитал"&&!doc.finished) doc.finished=today(); }
+  if(k==="decisions"&&status!=="Думаю"&&!doc.decidedOn) doc.decidedOn=today();
+  if(k==="goals"){ if(status==="Готово") doc.progress=100; if(!doc.horizon) doc.horizon="Год"; }
+  put("items",id,doc); closeSheet(); toast("Сохранено в «"+(l.name||"раздел")+"»"); });
+$("#i-del").addEventListener("click",e=>armed(e.currentTarget,()=>{ del("items",$("#f-item").dataset.id); closeSheet(); toast("Удалено"); }));
+$("#f-listcfg").addEventListener("submit",e=>{ e.preventDefault(); const name=$("#l-name").value.trim(); if(!name){toast("Назови раздел");return;}
+  const id=$("#f-listcfg").dataset.id||uid(), old=col("lists")[id]||{}, k=old.name?kindOf(old):"generic";
+  const doc={...old,name,kind:k,color:segVal($("#l-color"))||"idea",template:$("#l-template").value,order:old.order||listsSorted().length+1}; delete doc.id; delete doc.updated;
+  if(k==="generic"){ const statuses=$("#l-statuses").value.split(",").map(s=>s.trim()).filter(Boolean); if(!statuses.length){toast("Нужен хотя бы один статус");return;}
+    Object.assign(doc,{statuses,rating:$("#l-rating").checked,dateLabel:$("#l-datelabel").value.trim()}); }
+  put("lists",id,doc);
+  openList=id; closeSheet(); setTab("lists"); render(); toast("Раздел сохранён"); });
+$("#l-del").addEventListener("click",e=>armed(e.currentTarget,()=>{ const id=$("#f-listcfg").dataset.id; vals("items").filter(i=>i.list===id).forEach(i=>{ delete col("items")[i.id]; enqueue({op:"delete",col:"items",id:i.id}); }); openList=null; del("lists",id); closeSheet(); setTab("lists"); toast("Раздел удалён"); }));
+$("#f-event").addEventListener("submit",e=>{ e.preventDefault(); const title=$("#ev-title").value.trim(), date=$("#ev-date").value; if(!title||!date){toast("Нужны название и дата");return;}
+  put("events",$("#f-event").dataset.id||uid(),{title,date,camp:$("#ev-camp").checked,weight:num($("#ev-weight").value),plan:$("#ev-plan").value.trim(),result:$("#ev-result").value.trim(),notes:(col("events")[$("#f-event").dataset.id]||{}).notes||[]}); closeSheet(); toast("Событие сохранено"); });
+$("#ev-del").addEventListener("click",e=>armed(e.currentTarget,()=>{ del("events",$("#f-event").dataset.id); closeSheet(); toast("Удалено"); }));
+$("#f-tech").addEventListener("submit",e=>{ e.preventDefault(); const name=$("#k-name").value.trim(); if(!name){toast("Назови технику");return;}
+  const tid=$("#f-tech").dataset.id||uid(), told=col("techniques")[tid]||{}; const td={...told,name,status:segVal($("#k-status"))||"Учу",pos:$("#k-pos").value,belt:$("#k-belt").value,desc:$("#k-desc").value.trim(),cues:$("#k-cues").value.trim(),video:$("#k-video").value.trim()}; delete td.id; delete td.updated;
+  put("techniques",tid,td); closeSheet(); toast("Сохранено"); });
+$("#k-del").addEventListener("click",e=>armed(e.currentTarget,()=>{ del("techniques",$("#f-tech").dataset.id); closeSheet(); toast("Удалено"); }));
+$("#f-review").addEventListener("submit",e=>{ e.preventDefault(); const wk=monday(today()); const r={week:wk};
+  $$("#r-rates .rate-row").forEach(rw=>{const b=rw.querySelector('[aria-pressed="true"]'); if(b) r[rw.dataset.rate]=+b.dataset.v;});
+  r.screen=num($("#r-screen").value); r.weight=num($("#r-weight").value); r.win=$("#r-win").value.trim(); r.work=$("#r-work").value.trim(); r.stop=$("#r-stop").value.trim(); r.focus=$("#r-focus").value.trim();
+  put("reviews",wk,r); closeSheet(); toast("Обзор сохранён"); });
+
+$("#f-bill").addEventListener("submit",e=>{ e.preventDefault(); const name=$("#b-name").value.trim(), amt=num($("#b-amt").value); let day=Math.round(num($("#b-day").value)||1);
+  if(!name||!amt){ toast("Нужны название и сумма"); return; } day=Math.min(31,Math.max(1,day));
+  put("bills",$("#f-bill").dataset.id||uid(),{name,amt,day,cur:segVal($("#b-cur"))||"₺",cat:$("#b-cat").value}); closeSheet(); toast("Платёж сохранён"); });
+$("#b-del").addEventListener("click",e=>armed(e.currentTarget,()=>{ del("bills",$("#f-bill").dataset.id); closeSheet(); toast("Удалено"); }));
+$("#f-month").addEventListener("submit",e=>{ e.preventDefault(); const mk=today().slice(0,7), focus=[$("#mo-f1").value.trim(),$("#mo-f2").value.trim(),$("#mo-f3").value.trim()];
+  put("months",mk,{month:mk,savings:num($("#mo-sav").value),change:$("#mo-change").value.trim(),lesson:$("#mo-lesson").value.trim(),focus});
+  if(focus.some(Boolean)) saveSettings({focus}); closeSheet(); toast("Обзор месяца сохранён"); });
+function renameCat(key,from,to){ const list=[...(settings()[key]||[])]; const i=list.indexOf(from); if(i<0) return; if(list.includes(to)&&to!==from){ list.splice(i,1); } else list[i]=to; saveSettings({[key]:list});
+  const isInc=key==="incCats"; vals("money").filter(m=>m.cat===from&&((m.type==="Доход")===isInc)).forEach(m=>{ const d={...m,cat:to}; delete d.id; delete d.updated; put("money",m.id,d,true); });
+  if(!isInc) vals("bills").filter(b=>b.cat===from).forEach(b=>{ const d={...b,cat:to}; delete d.id; delete d.updated; put("bills",b.id,d,true); }); render(); }
+function removeCat(key,name){ saveSettings({[key]:(settings()[key]||[]).filter(c=>c!==name)}); toast("Категория «"+name+"» удалена"); }
+$("#f-cat").addEventListener("submit",e=>{ e.preventDefault(); const key=$("#f-cat").dataset.key, from=$("#f-cat").dataset.name, to=$("#c-name").value.trim(); if(!to){toast("Напиши название");return;}
+  if(to!==from) renameCat(key,from,to); closeSheet(); toast("Сохранено"); });
+$("#c-del").addEventListener("click",e=>armed(e.currentTarget,()=>{ removeCat($("#f-cat").dataset.key,$("#f-cat").dataset.name); closeSheet(); }));
+document.addEventListener("submit",e=>{ const f=e.target.closest("[data-catadd]"); if(!f) return; e.preventDefault(); const inp=f.querySelector("input"), v=inp.value.trim(); if(!v) return;
+  const key=f.dataset.catadd, list=[...(settings()[key]||[])]; if(!list.includes(v)) list.push(v); saveSettings({[key]:list}); inp.value=""; toast("Категория «"+v+"» добавлена"); });
+
+/* ---------- list & edit clicks ---------- */
+document.addEventListener("click",e=>{
+  const lc=e.target.closest("[data-list]"); if(lc){ openList=lc.dataset.list; listFilter="Все"; listSearch=""; renderLists(); window.scrollTo(0,0); return; }
+  const lf=e.target.closest("[data-lf]"); if(lf){ listFilter=lf.dataset.lf; renderLists(); return; }
+  const pb=e.target.closest("[data-paybill]"); if(pb){ const b=col("bills")[pb.dataset.paybill]; if(b) OPEN.expense(null,b); return; }
+  const bl=e.target.closest("[data-bill]"); if(bl){ OPEN.bill(bl.dataset.bill); return; }
+  const ce=e.target.closest("[data-catedit]"); if(ce){ const [k,...n]=ce.dataset.catedit.split("|"); OPEN.cat(k,n.join("|")); return; }
+  const cd=e.target.closest("[data-catdel]"); if(cd){ const chip=cd.closest(".catchip"); if(chip.dataset.armed==="1"){ const [k,...n]=cd.dataset.catdel.split("|"); removeCat(k,n.join("|")); } else { chip.dataset.armed="1"; setTimeout(()=>{ if(chip.isConnected) chip.dataset.armed=""; },3000); } return; }
+  const bj=e.target.closest("[data-bjj]"); if(bj){ bjjView=bj.dataset.bjj; renderBjj(); return; }
+  const ln=e.target.closest("[data-learn]"); if(ln){ const t=col("techniques")[ln.dataset.learn]; if(t){ const d={...t,status:"Учу"}; delete d.id; delete d.updated; put("techniques",t.id,d); toast("«"+t.name+"» — в работе"); } return; }
+  const sg=e.target.closest("[data-stage]"); if(sg){ const [id,st]=sg.dataset.stage.split("|"); const b=col("items")[id]; if(!b) return; const doc={...b}; delete doc.id; delete doc.updated;
+    if(st==="Прочитал"){ doc.status="Прочитал"; if(!doc.finished) doc.finished=today(); put("items",id,doc); toast("Книга дочитана — запиши главные идеи"); setTimeout(()=>OPEN.item(id),300); } else { doc.stage=st; put("items",id,doc); toast("Этап: "+st.toLowerCase()); } return; }
+  const it=e.target.closest("[data-item]"); if(it){ OPEN.item(it.dataset.item); return; }
+  const em=e.target.closest("[data-edit-money]"); if(em){ OPEN.expense(em.dataset.editMoney); return; }
+  const et=e.target.closest("[data-edit-train]"); if(et){ OPEN.train(et.dataset.editTrain); return; }
+  const tk=e.target.closest("[data-tech]"); if(tk){ OPEN.tech(tk.dataset.tech); return; }
+  const ev=e.target.closest("[data-event]"); if(ev){ OPEN.event(ev.dataset.event); return; }
+});
+$("#listBack").onclick=()=>{ openList=null; listSearch=""; renderLists(); setTab("lists"); };
+document.addEventListener("submit",e=>{ if(e.target.id!=="qaForm") return; e.preventDefault(); const v=$("#qa").value.trim(); if(!v) return;
+  const l=col("lists")[openList]; const st=listFilter!=="Все"?listFilter:statusesOf(l)[0]; put("items",uid(),{ts:Date.now(),list:openList,title:v,status:st,note:"",link:""}); const q=$("#qa"); if(q){q.value="";q.focus();} toast("Записано"); });
+document.addEventListener("submit",e=>{ if(e.target.id!=="campNoteForm") return; e.preventDefault(); const v=$("#campNote").value.trim(); if(!v) return;
+  const ev=col("events")[e.target.dataset.ev]; if(!ev) return; const d={...ev,notes:[...(ev.notes||[]),{ts:Date.now(),text:v}]}; delete d.id; delete d.updated; put("events",ev.id,d); toast("Записано в кэмп"); setTimeout(()=>{ const i=$("#campNote"); if(i) i.focus(); },50); });
+document.addEventListener("input",e=>{ if(e.target.id==="qaSearch"){ listSearch=e.target.value; renderLists(); } });
+$("#focusEdit").onclick=()=>{ const g=listsSorted().find(l=>kindOf(l)==="goals"); if(g){ openList=g.id; listFilter="Все"; setTab("lists"); renderLists(); } else setTab("settings"); };
+$("#listEdit").onclick=()=>OPEN.listcfg(openList);
+$("#listAdd").onclick=()=>OPEN.item(null,openList);
+function prevMonth(mk){ const [y,m]=mk.split("-").map(Number); const x=new Date(y,m-2,1); return x.getFullYear()+"-"+pad(x.getMonth()+1); }
+function shiftMonth(d){ const mk=monthSel||today().slice(0,7); const [y,m]=mk.split("-").map(Number); const x=new Date(y,m-1+d,1); monthSel=x.getFullYear()+"-"+pad(x.getMonth()+1); renderMoney(); }
+$("#mPrev").onclick=()=>{shiftMonth(-1);renderBills();}; $("#mNext").onclick=()=>{shiftMonth(1);renderBills();};
+
+/* ---------- settings ---------- */
+function saveSettings(patch){ put("settings","main",{...settings(),...patch}); }
+$$("[data-focus]").forEach(i=>i.addEventListener("change",()=>{ const f=[...(settings().focus||["","",""])]; f[+i.dataset.focus]=i.value.trim(); saveSettings({focus:f}); toast("Фокусы обновлены"); }));
+$("#rTRY").addEventListener("change",e=>{const v=num(e.target.value); if(v){saveSettings({rateTRY:v});toast("Курс ₺ обновлён");}});
+$("#rKGS").addEventListener("change",e=>{const v=num(e.target.value); if(v){saveSettings({rateKGS:v});toast("Курс сом обновлён");}});
+$("#cfgSave").onclick=async()=>{ const url=$("#cfgUrl").value.trim(), token=$("#cfgTok").value.trim();
+  if(url&&!/^https:\/\/script\.google(usercontent)?\.com\//.test(url)){ toast("Адрес должен начинаться с https://script.google.com/"); return; }
+  cfg={url,token}; try{localStorage.setItem(CFG,JSON.stringify(cfg));}catch(e){}
+  if(!url){ syncLabel(); renderSettings(); toast("Отключено: данные только на этом устройстве"); return; }
+  const ok=await pull(); renderSettings(); toast(ok?"Подключено":"Не получилось подключиться — проверь адрес и ключ"); };
+
+/* ---------- backup & export ---------- */
+function download(name,text,type){ const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([text],{type})); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000); }
+$("#bkSave").onclick=()=>download(`ilim-os-backup-${today()}.json`,JSON.stringify({v:1,data:store.data},null,1),"application/json");
+$("#bkLoad").addEventListener("change",async e=>{ const f=e.target.files[0]; if(!f) return;
+  try{ const j=JSON.parse(await f.text()); if(!j.data) throw 0; for(const c in j.data) for(const id in j.data[c]) put(c,id,j.data[c][id],true); render(); toast("Копия восстановлена"); }
+  catch(err){ toast("Этот файл не похож на копию Ilim OS"); } e.target.value=""; });
+const csvCell=v=>{v=v==null?"":String(v);return /[",\n;]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+const csv=rows=>"﻿"+rows.map(r=>r.map(csvCell).join(",")).join("\n");
+const EXPORT={
+  days:()=>[["Дата","Сон","Сигареты","Энергия","Настроение","Вес","Главное","Беспокоит","Понял","Завтра изменю","Свободно"],...vals("days").sort((a,b)=>a.date>b.date?1:-1).map(d=>{const j=d.j||{};return [d.date,d.sleep,d.cigs,d.energy,d.mood,d.weight,j.main,j.worry,j.learn,j.tom,j.free];})],
+  money:()=>[["Дата","Что","Сумма","Валюта","Курс за $1","В долларах","Тип","Категория","Можно было без"],...vals("money").sort((a,b)=>a.date>b.date?1:-1).map(i=>[i.date,i.what,i.amt,i.cur,i.rate,itemUsd(i).toFixed(2),i.type,i.cat,i.opt?"да":""])],
+  trainings:()=>[["Дата","Тип","Тема","Получилось","Не получилось","В следующий раз","Тренер"],...vals("trainings").sort((a,b)=>a.date>b.date?1:-1).map(t=>[t.date,t.type,t.topic,t.good,t.bad,t.next,t.coach])],
+  items:()=>{ const skip=new Set(["id","updated","ts","list","title","status"]); const keys=[...new Set(vals("items").flatMap(i=>Object.keys(i)).filter(k=>!skip.has(k)))];
+    return [["Раздел","Название","Статус",...keys],...vals("items").map(i=>[(col("lists")[i.list]||{}).name,i.title,i.status,...keys.map(k=>i[k]==null?"":i[k])])]; }
+};
+document.addEventListener("click",e=>{ const b=e.target.closest("[data-export]"); if(b) download(`ilim-os-${b.dataset.export}-${today()}.csv`,csv(EXPORT[b.dataset.export]()),"text/csv"); });
+
+/* ---------- boot ---------- */
+try{ const t=sessionStorage.getItem("tab"); if(t&&TITLES[t]) tab=t; }catch(e){}
+setTab(tab);
+if(!cfg.url&&!store.seeded) seedDefaults();
+if(!cfg.url) migrate();
+render();
+if(cfg.url) pull();
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"){ if(curDay>today()) curDay=today(); render(); pull(); } else { commitDay(); flush(); } });
+window.addEventListener("pagehide",()=>{ commitDay(); });
+window.addEventListener("online",()=>flush());
+setInterval(()=>{ if(render._d!==today()){ if(curDay===render._d) curDay=today(); render._d=today(); render(); } },60000); render._d=today();
+if("serviceWorker" in navigator&&location.protocol==="https:") navigator.serviceWorker.register("sw.js").catch(()=>{});
+})();
+</script>
+</body>
+</html>
