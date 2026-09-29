@@ -1,5 +1,5 @@
 // Ilim OS — офлайн-кэш. Меняй VERSION при обновлении файлов, чтобы телефон подтянул новую версию.
-const VERSION = "ilimos-v10";
+const VERSION = "ilimos-v11";
 const SHELL = ["./", "index.html", "manifest.json", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
